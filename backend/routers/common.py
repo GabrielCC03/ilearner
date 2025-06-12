@@ -13,9 +13,12 @@ async def openrouter(request: OpenRouterRequest) -> str:
     Returns: response content from OpenRouter API
     '''
 
-    print(f"Received data: {request.model}, {request.message}")
-
     responseJson = common.open_router_api(request.model, request.message)
     response = responseJson['choices'][0]['message']['content']
 
     return response
+
+@router.post("/openrouter-stream")
+async def openrouter_stream(request: OpenRouterRequest) -> str:
+    #TODO: Implement stream response. Check at openrouter api docs
+    return

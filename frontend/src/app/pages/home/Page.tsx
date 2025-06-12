@@ -29,12 +29,13 @@ interface LearningSpace {
 }
 
 export default function Home() {
+
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<string>('recent');
   const [opened, { open, close }] = useDisclosure(false);
   const [newSpaceName, setNewSpaceName] = useState('');
   
-  // Mock data - you'll replace this with actual API calls
+  //TODO: Replace with actual API calls and data
   const [learningSpaces, setLearningSpaces] = useState<LearningSpace[]>([
     {
       id: '1',
@@ -71,15 +72,17 @@ export default function Home() {
   };
 
   const handleSpaceClick = (spaceId: string) => {
-    // Navigate to learning space - you'll implement routing here
+    //TODO Navigate to learning space - you'll implement routing here
     console.log('Opening space:', spaceId);
   };
 
   const handleEditSpace = (spaceId: string) => {
+    //TODO: Implement edit space with db
     console.log('Editing space:', spaceId);
   };
 
   const handleDeleteSpace = (spaceId: string) => {
+    //TODO: Implement delete space with db
     setLearningSpaces(spaces => spaces.filter(space => space.id !== spaceId));
   };
 
