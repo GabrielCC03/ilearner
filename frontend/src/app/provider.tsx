@@ -1,14 +1,15 @@
-import React from 'react';
+import type { ReactNode } from 'react';
+import { MantineProvider } from '@mantine/core';
+import '@mantine/core/styles.css';
 
 interface AppProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
+export const AppProvider = ({ children }: AppProviderProps) => {
   return (
-    <>
-      {/* Add global providers here (e.g., React Query, Context providers, etc.) */}
+    <MantineProvider defaultColorScheme="auto">
       {children}
-    </>
+    </MantineProvider>
   );
 }; 

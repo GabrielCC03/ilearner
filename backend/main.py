@@ -2,7 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import asyncio
-from routers import template
+import os
+from dotenv import load_dotenv
+from routers import template, common
 
 app = FastAPI()
 
@@ -16,8 +18,13 @@ app.add_middleware(
 )
 
 app.include_router(template.router)
+app.include_router(common.router)
 
 if __name__ == "__main__":
+
+    # Load environment variables from .env file
+    load_dotenv()
+
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
