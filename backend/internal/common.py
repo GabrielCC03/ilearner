@@ -13,7 +13,7 @@ MODELS = {
     
 }
 
-def open_router_api(model: str = "openai/gpt-4o", message: str = ""):
+def open_router_api(model: str = "openai/gpt-4o", message: str = "") -> dict:
 
     '''
     OpenRouter API wrapper
