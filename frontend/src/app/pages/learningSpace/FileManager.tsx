@@ -214,7 +214,7 @@ export default function FileManager({
                 const isDeleting = deletingFileId === file.id;
                 
                 return (
-                  <Card key={file.id} padding="sm" withBorder>
+                  <Card key={file.id} padding="sm" withBorder onClick={() => handleFileView(file)}>
                     <Group justify="space-between" wrap="nowrap">
                       <Group gap="sm" className="flex-1 min-w-0">
                         <ThemeIcon variant="light" size="sm">
@@ -241,20 +241,25 @@ export default function FileManager({
                       <Group gap="xs">
                         <Menu shadow="md" width={150}>
                           <Menu.Target>
-                            <ActionIcon variant="subtle" size="sm">
+                            <ActionIcon 
+                              variant="subtle" 
+                              size="sm"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
+                            >
                               <IconDots size={14} />
                             </ActionIcon>
                           </Menu.Target>
                           <Menu.Dropdown>
                             <Menu.Item
-                              leftSection={<IconEye size={14} />}
-                              onClick={() => handleFileView(file)}
-                            >
-                              View
-                            </Menu.Item>
-                            <Menu.Item
                               leftSection={<IconDownload size={14} />}
-                              onClick={() => handleFileDownload(file)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleFileDownload(file);
+                              }}
                             >
                               Download
                             </Menu.Item>
@@ -262,7 +267,11 @@ export default function FileManager({
                             <Menu.Item
                               leftSection={<IconTrash size={14} />}
                               color="red"
-                              onClick={() => handleFileDelete(file.id)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleFileDelete(file.id);
+                              }}
                               disabled={isDeleting}
                             >
                               {isDeleting ? 'Deleting...' : 'Delete'}

@@ -218,33 +218,40 @@ export default function PdfViewer({ fileUrl, fileName, onBack }: PdfViewerProps)
         {/* PDF Document */}
         <Box
           style={{ 
-            textAlign: 'center', 
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
             border: '1px solid #dee2e6', 
             borderRadius: '8px',
             padding: '20px',
             backgroundColor: '#f8f9fa',
             minHeight: isFullscreen ? 'calc(100vh - 200px)' : '600px',
+            maxHeight: isFullscreen ? 'calc(100vh - 200px)' : '80vh',
             overflow: 'auto'
           }}
         >
-          <Document
-            file={fileUrl}
-            onLoadSuccess={onDocumentLoadSuccess}
-            onLoadError={onDocumentLoadError}
-            loading={
-              <Stack align="center" gap="md" py="xl">
-                <LoadingOverlay visible />
-                <Text c="dimmed">Loading PDF...</Text>
-              </Stack>
-            }
-          >
-            <Page 
-              pageNumber={pageNumber} 
-              scale={scale}
-              renderTextLayer={true}
-              renderAnnotationLayer={true}
-            />
-          </Document>
+          <Box style={{ maxWidth: '100%', maxHeight: '100%' }}>
+            <Document
+              file={fileUrl}
+              onLoadSuccess={onDocumentLoadSuccess}
+              onLoadError={onDocumentLoadError}
+              loading={
+                <Stack align="center" gap="md" py="xl">
+                  <LoadingOverlay visible />
+                  <Text c="dimmed">Loading PDF...</Text>
+                </Stack>
+              }
+            >
+              <Page 
+                pageNumber={pageNumber} 
+                scale={scale}
+                renderTextLayer={true}
+                renderAnnotationLayer={true}
+                width={undefined}
+                height={undefined}
+              />
+            </Document>
+          </Box>
         </Box>
       </Container>
     </Box>
