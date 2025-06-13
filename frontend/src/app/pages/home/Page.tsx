@@ -78,8 +78,16 @@ export default function Home() {
     }
   };
 
-  const handleSpaceClick = (spaceId: string) => {
+  const handleSpaceClick = (spaceId: string) => { 
+    // Update the updatedAt field
+    const updatedSpace = {
+      ...learningSpaces.find(space => space.id === spaceId),
+      updatedAt: new Date().toISOString()
+    };
+    learningSpaceApi.update(spaceId, updatedSpace);
+
     navigate(`/learning-space/${spaceId}`);
+    
   };
 
   const handleEditSpace = (spaceId: string) => {

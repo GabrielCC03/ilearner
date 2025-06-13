@@ -24,6 +24,7 @@ This schema uses separate collections for better scalability, performance, and t
   type: String, // 'pdf', 'txt', 'text'
   size: Number, // File size in bytes
   mimeType: String, // MIME type for uploaded files
+  content: Bytes
   
   // Metadata
   uploadedAt: Date,

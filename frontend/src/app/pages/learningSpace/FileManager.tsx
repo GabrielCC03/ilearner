@@ -1,21 +1,120 @@
-import { useState } from 'react';
-import { Box, Button, Stack, Text, Card, Group, ActionIcon, ThemeIcon } from '@mantine/core';
-import { IconPlus, IconFile, IconFileTypePdf, IconFileText, IconTrash } from '@tabler/icons-react';
+import { useState, useEffect } from 'react';
+import { 
+  Box, 
+  Button, 
+  Stack, 
+  Text, 
+  Card, 
+  Group, 
+  ActionIcon, 
+  ThemeIcon, 
+  Loader,
+  Alert,
+  Menu
+} from '@mantine/core';
+import { 
+  IconPlus, 
+  IconFile, 
+  IconFileTypePdf, 
+  IconFileText, 
+  IconTrash, 
+  IconDownload,
+  IconEye,
+  IconDots,
+  IconExclamationMark
+} from '@tabler/icons-react';
 import FileUploadModal from './FileUploadModal';
-import type { FileItem } from './types';
+import { filesApi } from '../../../api/database/files';
+import type { FileItem } from '../../../types/learningSpace';
 
 interface FileManagerProps {
+  learningSpaceId: string;
   files: FileItem[];
-  onFilesAdd: (files: File[]) => void;
-  onFileDelete: (fileId: string) => void;
+  loading: boolean;
+  onFilesAdded: (files: FileItem[]) => void;
+  onFileDeleted: (fileId: string) => void;
 }
 
-export default function FileManager({ files, onFilesAdd, onFileDelete }: FileManagerProps) {
+export default function FileManager({ 
+  learningSpaceId, 
+  files, 
+  loading, 
+  onFilesAdded, 
+  onFileDeleted 
+}: FileManagerProps) {
+  const [error, setError] = useState<string | null>(null);
   const [uploadModalOpened, setUploadModalOpened] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
+
+  const handleFilesAdd = async (newFiles: File[]) => {
+    try {
+      setUploading(true);
+      setError(null);
+      
+      const uploadedFiles = await filesApi.uploadMultiple(learningSpaceId, newFiles);
+      
+      // Convert upload response to FileItem format
+      const fileItems: FileItem[] = uploadedFiles.map(file => ({
+        ...file,
+        type: file.type as 'pdf' | 'txt' | 'text',
+        uploadedAt: file.uploadedAt
+      }));
+      
+      onFilesAdded(fileItems); // Notify parent
+    } catch (err) {
+      setError('Failed to upload files. Please try again.');
+      console.error('Error uploading files:', err);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileDelete = async (fileId: string) => {
+    try {
+      setDeletingFileId(fileId);
+      await filesApi.delete(fileId);
+      onFileDeleted(fileId); // Notify parent
+    } catch (err) {
+      setError('Failed to delete file. Please try again.');
+      console.error('Error deleting file:', err);
+    } finally {
+      setDeletingFileId(null);
+    }
+  };
+
+  const handleFileDownload = async (file: FileItem) => {
+    try {
+      await filesApi.download(file.id, file.name);
+    } catch (err) {
+      setError('Failed to download file. Please try again.');
+      console.error('Error downloading file:', err);
+    }
+  };
+
+  const handleFileView = async (file: FileItem) => {
+    try {
+      if (file.type === 'txt' || file.type === 'text') {
+        const content = await filesApi.getContent(file.id);
+        // You can show content in a modal or new window
+        const newWindow = window.open();
+        if (newWindow) {
+          newWindow.document.write(`<pre>${content}</pre>`);
+          newWindow.document.title = file.name;
+        }
+      } else {
+        // For non-text files, just download them
+        await handleFileDownload(file);
+      }
+    } catch (err) {
+      setError('Failed to view file. Please try again.');
+      console.error('Error viewing file:', err);
+    }
+  };
 
   const getFileIcon = (type: string) => {
-    if (type.includes('pdf')) return IconFileTypePdf;
-    if (type.includes('text')) return IconFileText;
+    if (type === 'pdf') return IconFileTypePdf;
+    if (type === 'txt' || type === 'text') return IconFileText;
     return IconFile;
   };
 
@@ -27,6 +126,10 @@ export default function FileManager({ files, onFilesAdd, onFileDelete }: FileMan
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
   return (
     <Box className="h-full flex flex-col">
       <Stack gap="md" className="p-4">
@@ -35,8 +138,10 @@ export default function FileManager({ files, onFilesAdd, onFileDelete }: FileMan
           variant="filled"
           onClick={() => setUploadModalOpened(true)}
           fullWidth
+          disabled={loading || uploading}
+          loading={uploading}
         >
-          Add Files
+          {uploading ? 'Uploading...' : 'Add Files'}
         </Button>
 
         <Text size="sm" fw={500} c="gray.7">
@@ -44,51 +149,106 @@ export default function FileManager({ files, onFilesAdd, onFileDelete }: FileMan
         </Text>
       </Stack>
 
+      {/* Error Alert */}
+      {error && (
+        <Alert 
+          icon={<IconExclamationMark size={16} />} 
+          color="red" 
+          m="md"
+          onClose={() => setError(null)}
+          withCloseButton
+        >
+          {error}
+        </Alert>
+      )}
+
       <Box className="flex-1 overflow-y-auto px-4 pb-4">
-        <Stack gap="xs">
-          {files.length === 0 ? (
-            <Text size="sm" c="dimmed" ta="center" py="xl">
-              No files uploaded yet
-            </Text>
-          ) : (
-            files.map((file) => {
-              const FileIcon = getFileIcon(file.type);
-              return (
-                <Card key={file.id} padding="sm" withBorder>
-                  <Group justify="space-between" wrap="nowrap">
-                    <Group gap="sm" className="flex-1 min-w-0">
-                      <ThemeIcon variant="light" size="sm">
-                        <FileIcon size={16} />
-                      </ThemeIcon>
-                      <Box className="flex-1 min-w-0">
-                        <Text size="sm" truncate>
-                          {file.name}
-                        </Text>
-                        <Text size="xs" c="dimmed">
-                          {formatFileSize(file.size)}
-                        </Text>
-                      </Box>
+        {loading ? (
+          <div className="text-center py-8">
+            <Loader size="lg" mb="md" />
+            <Text c="gray.5">Loading files...</Text>
+          </div>
+        ) : (
+          <Stack gap="xs">
+            {files.length === 0 ? (
+              <Text size="sm" c="dimmed" ta="center" py="xl">
+                No files uploaded yet
+              </Text>
+            ) : (
+              files.map((file) => {
+                const FileIcon = getFileIcon(file.type);
+                const isDeleting = deletingFileId === file.id;
+                
+                return (
+                  <Card key={file.id} padding="sm" withBorder>
+                    <Group justify="space-between" wrap="nowrap">
+                      <Group gap="sm" className="flex-1 min-w-0">
+                        <ThemeIcon variant="light" size="sm">
+                          <FileIcon size={16} />
+                        </ThemeIcon>
+                        <Box className="flex-1 min-w-0">
+                          <Text size="sm" truncate title={file.name}>
+                            {file.name}
+                          </Text>
+                          <Group gap="xs">
+                            <Text size="xs" c="dimmed">
+                              {formatFileSize(file.size)}
+                            </Text>
+                            <Text size="xs" c="dimmed">
+                              •
+                            </Text>
+                            <Text size="xs" c="dimmed">
+                              {formatDate(file.uploadedAt)}
+                            </Text>
+                          </Group>
+                        </Box>
+                      </Group>
+                      
+                      <Group gap="xs">
+                        <Menu shadow="md" width={150}>
+                          <Menu.Target>
+                            <ActionIcon variant="subtle" size="sm">
+                              <IconDots size={14} />
+                            </ActionIcon>
+                          </Menu.Target>
+                          <Menu.Dropdown>
+                            <Menu.Item
+                              leftSection={<IconEye size={14} />}
+                              onClick={() => handleFileView(file)}
+                            >
+                              View
+                            </Menu.Item>
+                            <Menu.Item
+                              leftSection={<IconDownload size={14} />}
+                              onClick={() => handleFileDownload(file)}
+                            >
+                              Download
+                            </Menu.Item>
+                            <Menu.Divider />
+                            <Menu.Item
+                              leftSection={<IconTrash size={14} />}
+                              color="red"
+                              onClick={() => handleFileDelete(file.id)}
+                              disabled={isDeleting}
+                            >
+                              {isDeleting ? 'Deleting...' : 'Delete'}
+                            </Menu.Item>
+                          </Menu.Dropdown>
+                        </Menu>
+                      </Group>
                     </Group>
-                    <ActionIcon
-                      variant="subtle"
-                      color="red"
-                      size="sm"
-                      onClick={() => onFileDelete(file.id)}
-                    >
-                      <IconTrash size={14} />
-                    </ActionIcon>
-                  </Group>
-                </Card>
-              );
-            })
-          )}
-        </Stack>
+                  </Card>
+                );
+              })
+            )}
+          </Stack>
+        )}
       </Box>
 
       <FileUploadModal
         opened={uploadModalOpened}
         onClose={() => setUploadModalOpened(false)}
-        onFileDrop={onFilesAdd}
+        onFileDrop={handleFilesAdd}
       />
     </Box>
   );

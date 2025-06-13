@@ -38,7 +38,7 @@ export function DropzoneCustom({ onDrop }: DropzoneCustomProps) {
           <Text ta="center" fw={700} fz="lg" mt="xl">
             <Dropzone.Accept>Drop files here</Dropzone.Accept>
             <Dropzone.Reject>Pdf file less than 30mb</Dropzone.Reject>
-            <Dropzone.Idle>Upload resume</Dropzone.Idle>
+            <Dropzone.Idle>Upload Files</Dropzone.Idle>
           </Text>
 
           <Text className={classes.description}>

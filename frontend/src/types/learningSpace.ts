@@ -1,10 +1,26 @@
 export interface FileItem {
   id: string;
+  learningSpaceId: string;
   name: string;
-  type: 'pdf' | 'txt' | 'docx';
+  type: 'pdf' | 'txt' | 'text';
   size: number;
+  mimeType: string;
   uploadedAt: string;
   content?: string;
+}
+
+export interface FileUploadResponse {
+  id: string;
+  learningSpaceId: string;
+  name: string;
+  type: string;
+  size: number;
+  mimeType: string;
+  uploadedAt: string;
+}
+
+export interface FileContentResponse {
+  content: string;
 }
 
 export interface ChatMessage {
