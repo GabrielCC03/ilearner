@@ -4,7 +4,7 @@ import uvicorn
 import asyncio
 import os
 from dotenv import load_dotenv
-from routers import template, common
+from routers import template, common, learning_spaces
 
 app = FastAPI()
 
@@ -19,6 +19,7 @@ app.add_middleware(
 
 app.include_router(template.router)
 app.include_router(common.router)
+app.include_router(learning_spaces.router)
 
 if __name__ == "__main__":
 

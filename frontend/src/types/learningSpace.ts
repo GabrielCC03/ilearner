@@ -18,11 +18,14 @@ export interface LearningSpace {
   id: string;
   name: string;
   createdAt: string;
-  description?: string;
-  fileCount?: number;
+  updatedAt: string;
+  fileCount: number;
 }
 
 export interface CreateLearningSpaceRequest {
   name: string;
-  description?: string;
+}
+
+export interface UpdateLearningSpaceRequest {
+  name?: string;
 } 

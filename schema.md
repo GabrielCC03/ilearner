@@ -9,7 +9,6 @@ This schema uses separate collections for better scalability, performance, and t
 {
   _id: ObjectId,
   name: String,
-  description: String, // Optional description of the learning space
   createdAt: Date,
   updatedAt: Date,
   // Metadata fields
