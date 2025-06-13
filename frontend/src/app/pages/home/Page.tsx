@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Container, 
   Title, 
@@ -27,6 +28,8 @@ import { learningSpaceApi } from '../../../api/database/learningSpace';
 import type { LearningSpace } from '../../../types/learningSpace';
 
 export default function Home() {
+  
+  const navigate = useNavigate();
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<string>('recent');
@@ -76,8 +79,7 @@ export default function Home() {
   };
 
   const handleSpaceClick = (spaceId: string) => {
-    //TODO Navigate to learning space - you'll implement routing here
-    console.log('Opening space:', spaceId);
+    navigate(`/learning-space/${spaceId}`);
   };
 
   const handleEditSpace = (spaceId: string) => {
