@@ -1,12 +1,16 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Home from './pages/home/Page';
+import LearningSpacePage from './pages/learningSpace/Page';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Home />,
   },
-  
+  {
+    path: '/learning-space/:id',
+    element: <LearningSpacePage />,
+  },
 ]);
 
 export const AppRouter = () => {
