@@ -17,7 +17,7 @@ export function Header() {
               <img src="/i-learner-logo.png" alt="iLearner Logo" className="w-10 h-10 rounded-2xl" />
             </div>
             <Text size="xl" fw={600} c="white">
-              iLearner
+              ilearner
             </Text>
           </div>
         </Group>
