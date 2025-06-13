@@ -24,6 +24,7 @@ import {
   IconExclamationMark
 } from '@tabler/icons-react';
 import FileUploadModal from './FileUploadModal';
+import PdfViewer from '../../../components/PdfViewer';
 import { filesApi } from '../../../api/database/files';
 import type { FileItem } from '../../../types/learningSpace';
 
@@ -33,6 +34,13 @@ interface FileManagerProps {
   loading: boolean;
   onFilesAdded: (files: FileItem[]) => void;
   onFileDeleted: (fileId: string) => void;
+}
+
+interface ViewingFile {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
 }
 
 export default function FileManager({ 
@@ -46,6 +54,7 @@ export default function FileManager({
   const [uploadModalOpened, setUploadModalOpened] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
+  const [viewingFile, setViewingFile] = useState<ViewingFile | null>(null);
 
   const handleFilesAdd = async (newFiles: File[]) => {
     try {
@@ -94,7 +103,16 @@ export default function FileManager({
 
   const handleFileView = async (file: FileItem) => {
     try {
-      if (file.type === 'txt' || file.type === 'text') {
+      if (file.type === 'pdf') {
+        // Get the file URL from the API
+        const fileUrl = await filesApi.getFileUrl(file.id);
+        setViewingFile({
+          id: file.id,
+          name: file.name,
+          url: fileUrl,
+          type: file.type
+        });
+      } else if (file.type === 'txt' || file.type === 'text') {
         const content = await filesApi.getContent(file.id);
         // You can show content in a modal or new window
         const newWindow = window.open();
@@ -103,13 +121,17 @@ export default function FileManager({
           newWindow.document.title = file.name;
         }
       } else {
-        // For non-text files, just download them
+        // For other file types, just download them
         await handleFileDownload(file);
       }
     } catch (err) {
       setError('Failed to view file. Please try again.');
       console.error('Error viewing file:', err);
     }
+  };
+
+  const handleBackToFileList = () => {
+    setViewingFile(null);
   };
 
   const getFileIcon = (type: string) => {
@@ -130,6 +152,18 @@ export default function FileManager({
     return new Date(dateString).toLocaleDateString();
   };
 
+  // If viewing a PDF file, render the PDF viewer
+  if (viewingFile && viewingFile.type === 'pdf') {
+    return (
+      <PdfViewer
+        fileUrl={viewingFile.url}
+        fileName={viewingFile.name}
+        onBack={handleBackToFileList}
+      />
+    );
+  }
+
+  // Otherwise, render the file manager
   return (
     <Box className="h-full flex flex-col">
       <Stack gap="md" className="p-4">

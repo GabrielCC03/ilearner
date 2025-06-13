@@ -134,6 +134,13 @@ export const uploadMultipleFiles = async (
 };
 
 /**
+ * Get file URL for viewing (returns the download endpoint URL)
+ */
+export const getFileUrl = async (fileId: string): Promise<string> => {
+  return `${API_BASE_URL}/${fileId}/download`;
+};
+
+/**
  * API client object with all file methods
  */
 export const filesApi = {
@@ -143,5 +150,6 @@ export const filesApi = {
   getById: getFileById,
   download: downloadFile,
   getContent: getFileContent,
+  getFileUrl: getFileUrl,
   delete: deleteFile,
 };
