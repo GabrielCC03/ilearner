@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   Button, 
@@ -45,9 +45,13 @@ export default function EssayTopicPage() {
   const [essayInstructions, setEssayInstructions] = useState<EssayInstructions | null>(null);
   const [feedback, setFeedback] = useState<EssayFeedback | null>(null);
   const [toolHistoryId, setToolHistoryId] = useState<string | null>(null);
+  // Prevent double initialization in StrictMode
+  const hasInitialized = useRef(false);
   
   // Initialize the page - either generate new or load existing
   useEffect(() => {
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
     const initialize = async () => {
       if (!state?.learningSpaceId) {
         setError('Learning space not found');

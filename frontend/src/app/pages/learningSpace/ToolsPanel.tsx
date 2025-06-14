@@ -30,18 +30,16 @@ export default function ToolsPanel({ tools, history, learningSpaceId, files, onD
     {
       id: 'mcq-quiz',
       name: 'Create MCQ Quiz',
-      description: 'Generate multiple choice questions',
+      description: 'Practice answering multiple choice questions',
       icon: IconBrain,
       route: '/tools/mcq',
-      action: () => console.log('Create MCQ Quiz')
     },
     {
       id: 'essay-topics',
       name: 'Generate Essay Topics',
-      description: 'Create essay prompts and guidelines',
+      description: 'Practice writing an essay based on the materials',
       icon: IconFileText,
       route: '/tools/essay-topic',
-      action: () => console.log('Generate Essay Topics')
     }
   ];
 
