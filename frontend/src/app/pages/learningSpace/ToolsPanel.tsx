@@ -1,13 +1,19 @@
 import { Box, Text, Button, Stack, Card, Group, ThemeIcon, Divider, ScrollArea } from '@mantine/core';
-import { IconBrain, IconFileText, IconHistory, IconChevronRight } from '@tabler/icons-react';
+import { IconBrain, IconFileText, IconHistory } from '@tabler/icons-react';
 import type { Tool, HistoryItem } from './types';
+import type { FileItem } from '../../../types/learningSpace';
+import { formatDate } from '../../../api/common';
+import ToolCard from '../../../components/ToolCard';
 
 interface ToolsPanelProps {
   tools: Tool[];
   history: HistoryItem[];
+  learningSpaceId: string;
+  files: FileItem[];
 }
 
-export default function ToolsPanel({ tools, history }: ToolsPanelProps) {
+export default function ToolsPanel({ tools, history, learningSpaceId, files }: ToolsPanelProps) {
+
   const getHistoryIcon = (type: string) => {
     switch (type) {
       case 'quiz':
@@ -19,21 +25,13 @@ export default function ToolsPanel({ tools, history }: ToolsPanelProps) {
     }
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   const defaultTools: Tool[] = [
     {
       id: 'mcq-quiz',
       name: 'Create MCQ Quiz',
       description: 'Generate multiple choice questions',
       icon: IconBrain,
+      route: '/tools/mcq',
       action: () => console.log('Create MCQ Quiz')
     },
     {
@@ -41,6 +39,7 @@ export default function ToolsPanel({ tools, history }: ToolsPanelProps) {
       name: 'Generate Essay Topics',
       description: 'Create essay prompts and guidelines',
       icon: IconFileText,
+      route: '/tools/essay-topic',
       action: () => console.log('Generate Essay Topics')
     }
   ];
@@ -55,27 +54,14 @@ export default function ToolsPanel({ tools, history }: ToolsPanelProps) {
           Study Tools
         </Text>
         <Stack gap="sm">
-          {toolsToShow.map((tool) => {
-            const IconComponent = tool.icon;
-            return (
-              <Card key={tool.id} padding="md" withBorder className="cursor-pointer hover:shadow-md transition-shadow">
-                <Group gap="sm" onClick={tool.action}>
-                  <ThemeIcon variant="light" size="md">
-                    <IconComponent size={18} />
-                  </ThemeIcon>
-                  <Box className="flex-1">
-                    <Text size="sm" fw={500}>
-                      {tool.name}
-                    </Text>
-                    <Text size="xs" c="dimmed">
-                      {tool.description}
-                    </Text>
-                  </Box>
-                  <IconChevronRight size={16} />
-                </Group>
-              </Card>
-            );
-          })}
+          {toolsToShow.map((tool) => (
+            <ToolCard 
+              key={tool.id}
+              tool={tool} 
+              learningSpaceId={learningSpaceId}
+              files={files}
+            />
+          ))}
         </Stack>
       </Box>
 

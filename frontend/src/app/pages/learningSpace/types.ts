@@ -18,7 +18,8 @@ export interface Tool {
   name: string;
   description: string;
   icon: React.ComponentType<any>;
-  action: () => void;
+  route: string;
+  action?: () => void;
 }
 
 export interface HistoryItem {

@@ -43,11 +43,10 @@
       - Filename or link title
       - Preview toggle (show extracted or input text snippet)
       - **Delete** button
-- **Practice Options**
-  - **Select Practice Type**
-    - Radio buttons or dropdown:
-      - Essay Prompt & Guidelines
-      - Multiple-Choice Quiz
+- **Learning Tools**
+  - **Select Practice Type menu list**
+    - Essay Prompt & Guidelines
+    - Multiple-Choice Quiz
   - **Generate Assessment**: Button to trigger generation based on selected type and current files
 
 ## Front-End Components

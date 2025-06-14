@@ -83,6 +83,8 @@ export default function LearningSpacePage() {
           <ToolsPanel 
             tools={[]}
             history={[]}
+            learningSpaceId={id}
+            files={files}
           />
         </Box>
       </Box>
