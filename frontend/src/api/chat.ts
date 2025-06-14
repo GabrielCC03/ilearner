@@ -36,7 +36,6 @@ export class ChatService {
     };
 
     try {
-      console.log('Starting streaming request...'); // Debug log
       
       const response = await fetch(`${API_BASE_URL}/chat/message`, {
         method: 'POST',

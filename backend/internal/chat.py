@@ -59,7 +59,7 @@ async def send_chat_message_with_streaming(
     # 4. Stream the response from OpenRouter
     assistant_response = ""
     try:
-        async for chunk in open_router_api_streaming(model=model, message=conversation_context, files=files):
+        async for chunk in open_router_api_streaming(model=model, prompt=conversation_context, files=files):
             assistant_response += chunk
             yield chunk
             

@@ -15,13 +15,15 @@ MODELS = {
     
 }
 
-async def open_router_api(model: str = "openai/gpt-4o", message: str = "", files: Optional[List] = None) -> dict:
+async def open_router_api(model: str = "openai/gpt-4o", prompt: str = "", files: Optional[List] = None) -> dict:
 
     '''
     OpenRouter API wrapper
     Returns: response from OpenRouter API
     '''
     try:
+        # Build the complete prompt with file context
+        prompt = prompt_with_files_context(prompt, files)
 
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
@@ -33,7 +35,7 @@ async def open_router_api(model: str = "openai/gpt-4o", message: str = "", files
                 "messages": [
                 {
                     "role": "user",
-                    "content": message
+                    "content": prompt
                 }
                 ]
             })
@@ -43,12 +45,15 @@ async def open_router_api(model: str = "openai/gpt-4o", message: str = "", files
 
     return response.json()
 
-async def open_router_api_streaming(model: str = "openai/gpt-4o", message: str = "", files: Optional[List] = None):
+async def open_router_api_streaming(model: str = "openai/gpt-4o", prompt: str = "", files: Optional[List] = None):
     '''
     OpenRouter API wrapper for streaming. https://openrouter.ai/docs/api-reference/streaming
     Yields: content chunks from OpenRouter API stream
     '''
     try:
+        # Build the complete prompt with file context
+        prompt = prompt_with_files_context(prompt, files)
+        
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -60,7 +65,7 @@ async def open_router_api_streaming(model: str = "openai/gpt-4o", message: str =
                 "messages": [
                     {
                         "role": "user",
-                        "content": message
+                        "content": prompt
                     }
                 ],
                 "stream": True
@@ -99,6 +104,54 @@ async def open_router_api_streaming(model: str = "openai/gpt-4o", message: str =
                     
     except Exception as e:
         yield f"Error: Failed to get streaming response from OpenRouter API - {str(e)}"
+
+def prompt_with_files_context(prompt: str, files: Optional[List] = None) -> str:
+    """
+    Build a complete prompt with file context appended
+    
+    Args:
+        prompt: The user's prompt
+        files: List of File objects (Pydantic models) with extractedText
+    
+    Returns:
+        Complete prompt with context appended
+    """
+    if not files:
+        return prompt
+    
+    # Filter files that have extractedText
+    files_with_text = []
+    for file in files:
+        # Handle both dict and Pydantic model objects
+        if hasattr(file, 'extractedText'):
+            extracted_text = getattr(file, 'extractedText', None)
+            name = getattr(file, 'name', 'Unknown File')
+        else:
+            extracted_text = file.get('extractedText') if isinstance(file, dict) else None
+            name = file.get('name', 'Unknown File') if isinstance(file, dict) else 'Unknown File'
+        
+        if extracted_text and extracted_text.strip():
+            files_with_text.append({
+                'name': name,
+                'extractedText': extracted_text
+            })
+    
+    if not files_with_text:
+        return prompt
+    
+    # Build context section
+    context_parts = []
+    for file in files_with_text:
+        filename = file['name']
+        extracted_text = file['extractedText'].strip()
+        
+        context_parts.append(f"{filename}:\n{extracted_text}")
+    
+    # Combine prompt with context
+    context_section = '\n\n'.join(context_parts)
+    prompt = f"{prompt}\n\nContext:\n{context_section}"
+    
+    return prompt
 
 def parse_file(content: bytes, file_type: str, mime_type: str) -> Optional[str]:
     """
