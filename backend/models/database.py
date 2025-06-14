@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Union
 
 class LearningSpace(BaseModel):
     id: str
@@ -32,3 +32,19 @@ class ChatMessage(BaseModel):
     
     # Message metadata
     messageId: str  # Unique identifier for this message
+
+
+
+class ToolHistory(BaseModel):
+    id: str
+    learningSpaceId: str  # Reference to LearningSpaces._id
+    type: str  # 'essay', 'mcq', etc.
+    createdAt: datetime
+    updatedAt: datetime
+    
+    # Tool-specific data stored as flexible dictionary
+    toolData: Optional[Dict[str, Any]] = None
+    
+    # Common metadata
+    status: str  # 'active', 'completed', 'archived'
+    tags: Optional[List[str]] = None

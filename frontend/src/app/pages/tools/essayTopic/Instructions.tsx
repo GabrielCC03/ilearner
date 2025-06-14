@@ -1,14 +1,9 @@
 import { Card, Stack, Group, Text, Paper, List, ActionIcon, Collapse } from '@mantine/core';
 import { IconTarget, IconBulb, IconCheck, IconBook, IconChevronUp, IconChevronDown } from '@tabler/icons-react';
-
-interface EssayData {
-  topic: string;
-  guidelines: string[];
-  helpingMaterial: string[];
-}
+import type { EssayInstructions } from '../../../../types/tools';
 
 interface InstructionsProps {
-  essayData: EssayData | null;
+  essayData: EssayInstructions | null;
   isMinimized?: boolean;
   isOpen?: boolean;
   onToggle?: () => void;

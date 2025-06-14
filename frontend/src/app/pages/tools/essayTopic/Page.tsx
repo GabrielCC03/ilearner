@@ -8,38 +8,23 @@ import {
   Stack, 
   Group, 
   Grid,
-  Progress} from '@mantine/core';
-import { 
-  IconArrowLeft} from '@tabler/icons-react';
+  Progress,
+  Alert
+} from '@mantine/core';
+import { IconArrowLeft, IconAlertCircle } from '@tabler/icons-react';
 import { Header } from '../../../../components';
 import type { FileItem } from '../../../../types/learningSpace';
+import type { EssayInstructions, EssayFeedback } from '../../../../types/tools';
 import { Instructions } from './Instructions';
 import { Essay } from './Essay';
 import { FeedbackComponent } from './Feedback';
+import { generateEssayTopic, submitEssay, getEssayHistory } from '../../../../api/tools/essayTopic';
 
 interface NavigationState {
   learningSpaceId: string;
   files: FileItem[];
   toolId: string;
-}
-
-interface EssayData {
-  topic: string;
-  guidelines: string[];
-  helpingMaterial: string[];
-}
-
-interface Feedback {
-  score: number;
-  overallStrengths: string[];
-  overallImprovements: string[];
-  detailedFeedback: string;
-  rubricScores: {
-    understandingAccuracy: { score: number; maxScore: number; feedback: string; };
-    clarityOrganization: { score: number; maxScore: number; feedback: string; };
-    criticalThinking: { score: number; maxScore: number; feedback: string; };
-    languageGrammar: { score: number; maxScore: number; feedback: string; };
-  };
+  toolHistoryId?: string; // For reopening existing essays
 }
 
 export default function EssayTopicPage() {
@@ -51,48 +36,59 @@ export default function EssayTopicPage() {
   
   // UI State
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(true); // Toggle between components and feedback
+  const [showFeedback, setShowFeedback] = useState(true);
   const [studentEssay, setStudentEssay] = useState('');
   const [isGenerating, setIsGenerating] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Essay data
-  const [essayData, setEssayData] = useState<EssayData | null>(null);
-  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [essayInstructions, setEssayInstructions] = useState<EssayInstructions | null>(null);
+  const [feedback, setFeedback] = useState<EssayFeedback | null>(null);
+  const [toolHistoryId, setToolHistoryId] = useState<string | null>(null);
   
-  // Mock data generation
+  // Initialize the page - either generate new or load existing
   useEffect(() => {
-    // Simulate API call to generate essay topic
-    const generateEssayTopic = async () => {
-      setIsGenerating(true);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Mock generated data based on files
-      const mockEssayData: EssayData = {
-        topic: "The Impact of Digital Technology on Modern Education",
-        guidelines: [
-          "Write a 300-400 word essay discussing the topic",
-          "Include at least 2 specific examples from the provided materials",
-          "Structure your essay with an introduction, body paragraphs, and conclusion",
-          "Use clear topic sentences and transitions between paragraphs",
-          "Support your arguments with evidence from the readings"
-        ],
-        helpingMaterial: [
-          "Consider the transformation of traditional classroom settings",
-          "Think about both positive and negative impacts of technology",
-          "Reference specific technologies mentioned in your materials (e.g., LMS, interactive whiteboards)",
-          "Consider different perspectives: students, teachers, and institutions",
-          "Key themes to explore: accessibility, engagement, digital divide, personalized learning"
-        ]
-      };
-      
-      setEssayData(mockEssayData);
-      setIsGenerating(false);
+    const initialize = async () => {
+      if (!state?.learningSpaceId) {
+        setError('Learning space not found');
+        setIsGenerating(false);
+        return;
+      }
+
+      try {
+        if (state.toolHistoryId) {
+          // Reopening existing essay
+          const history = await getEssayHistory(state.toolHistoryId);
+          setEssayInstructions({
+            toolHistoryId: history.toolHistoryId,
+            topic: history.topic,
+            guidelines: history.guidelines,
+            helpingMaterial: history.helpingMaterial
+          });
+          setStudentEssay(history.studentEssay);
+          setToolHistoryId(history.toolHistoryId);
+          
+          if (history.feedback && history.status === 'completed') {
+            setFeedback(history.feedback);
+            setIsSubmitted(true);
+            setShowFeedback(true);
+          }
+        } else {
+          // Generate new essay topic
+          const instructions = await generateEssayTopic(state.learningSpaceId);
+          setEssayInstructions(instructions);
+          setToolHistoryId(instructions.toolHistoryId);
+        }
+      } catch (err) {
+        console.error('Failed to initialize essay tool:', err);
+        setError('Failed to load essay tool. Please try again.');
+      } finally {
+        setIsGenerating(false);
+      }
     };
-    
-    generateEssayTopic();
-  }, []);
+
+    initialize();
+  }, [state]);
   
   const handleBackToLearningSpace = () => {
     if (state?.learningSpaceId) {
@@ -103,49 +99,20 @@ export default function EssayTopicPage() {
   };
   
   const handleSubmitEssay = async () => {
-    if (!studentEssay.trim()) return;
+    if (!studentEssay.trim() || !toolHistoryId) return;
     
-    // Mock feedback generation
-    const mockFeedback: Feedback = {
-      score: 85,
-      overallStrengths: [
-        "Clear thesis statement and well-structured arguments",
-        "Good use of examples from the provided materials",
-        "Effective transitions between paragraphs"
-      ],
-      overallImprovements: [
-        "Consider expanding on the digital divide discussion",
-        "Add more specific statistics or data to support claims",
-        "Strengthen the conclusion with a call to action"
-      ],
-      detailedFeedback: "Your essay demonstrates a solid understanding of the topic with well-organized thoughts and relevant examples. The introduction effectively sets up your argument, and you've done well to incorporate evidence from the provided materials. To improve, consider adding more quantitative data to support your claims and expanding on the socioeconomic implications of the digital divide in education.",
-      rubricScores: {
-        understandingAccuracy: {
-          score: 22,
-          maxScore: 25,
-          feedback: "Demonstrates strong understanding of the topic with accurate information and relevant examples from the materials."
-        },
-        clarityOrganization: {
-          score: 20,
-          maxScore: 25,
-          feedback: "Well-organized structure with clear introduction, body, and conclusion. Good use of transitions between paragraphs."
-        },
-        criticalThinking: {
-          score: 18,
-          maxScore: 25,
-          feedback: "Shows good analysis but could benefit from deeper critical evaluation and more diverse perspectives."
-        },
-        languageGrammar: {
-          score: 25,
-          maxScore: 25,
-          feedback: "Excellent grammar, vocabulary, and sentence structure throughout the essay."
-        }
-      }
-    };
-    
-    setFeedback(mockFeedback);
-    setIsSubmitted(true);
-    setShowFeedback(true); // Show feedback first after submission
+    try {
+      setIsGenerating(true);
+      const result = await submitEssay(toolHistoryId, studentEssay);
+      setFeedback(result.feedback);
+      setIsSubmitted(true);
+      setShowFeedback(true);
+    } catch (err) {
+      console.error('Failed to submit essay:', err);
+      setError('Failed to submit essay. Please try again.');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   if (isGenerating) {
@@ -166,13 +133,48 @@ export default function EssayTopicPage() {
             
             <div className="flex flex-col items-center justify-center flex-1">
               <Stack align="center" gap="lg">
-                <Title order={2}>Generating Essay Topic...</Title>
+                <Title order={2}>
+                  {state?.toolHistoryId ? 'Loading Essay...' : 'Generating Essay Topic...'}
+                </Title>
                 <Text c="dimmed" ta="center">
-                  Analyzing your uploaded materials to create a personalized essay topic
+                  {state?.toolHistoryId 
+                    ? 'Loading your essay and feedback'
+                    : 'Analyzing your uploaded materials to create a personalized essay topic'
+                  }
                 </Text>
                 <Progress value={75} size="lg" radius="xl" style={{ width: '300px' }} animated />
               </Stack>
             </div>
+          </Stack>
+        </Container>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-screen flex flex-col">
+        <Header />
+        <Container size="xl" className="flex-1 py-6">
+          <Stack gap="lg">
+            <Group>
+              <Button
+                variant="subtle"
+                leftSection={<IconArrowLeft size={16} />}
+                onClick={handleBackToLearningSpace}
+              >
+                Back to Learning Space
+              </Button>
+            </Group>
+            
+            <Alert 
+              icon={<IconAlertCircle size={16} />} 
+              title="Error" 
+              color="red"
+              variant="light"
+            >
+              {error}
+            </Alert>
           </Stack>
         </Container>
       </div>
@@ -227,7 +229,7 @@ export default function EssayTopicPage() {
             /* Pre-submission: Side by side layout */
             <Grid gutter="lg">
               <Grid.Col span={6}>
-                <Instructions essayData={essayData} />
+                <Instructions essayData={essayInstructions} />
               </Grid.Col>
 
               <Grid.Col span={6}>
@@ -246,7 +248,7 @@ export default function EssayTopicPage() {
               ) : (
                 <Grid gutter="lg">
                   <Grid.Col span={6}>
-                    <Instructions essayData={essayData} />
+                    <Instructions essayData={essayInstructions} />
                   </Grid.Col>
 
                   <Grid.Col span={6}>

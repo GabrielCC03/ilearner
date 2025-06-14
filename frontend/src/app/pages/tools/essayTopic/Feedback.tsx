@@ -1,20 +1,8 @@
 import { Card, Stack, Title, Text, Group, Grid, Paper, List, Divider } from '@mantine/core';
-
-interface Feedback {
-  score: number;
-  overallStrengths: string[];
-  overallImprovements: string[];
-  detailedFeedback: string;
-  rubricScores: {
-    understandingAccuracy: { score: number; maxScore: number; feedback: string; };
-    clarityOrganization: { score: number; maxScore: number; feedback: string; };
-    criticalThinking: { score: number; maxScore: number; feedback: string; };
-    languageGrammar: { score: number; maxScore: number; feedback: string; };
-  };
-}
+import type { EssayFeedback } from '../../../../types/tools';
 
 interface FeedbackProps {
-  feedback: Feedback | null;
+  feedback: EssayFeedback | null;
 }
 
 export function FeedbackComponent({ feedback }: FeedbackProps) {

@@ -5,7 +5,8 @@ import asyncio
 import os
 from dotenv import load_dotenv
 from routers import template, common, chat
-from routers.database import files, learning_spaces
+from routers.database import files, learning_spaces, tool_history
+from routers.tools import essay_topic
 
 
 app = FastAPI()
@@ -24,6 +25,8 @@ app.include_router(common.router)
 app.include_router(learning_spaces.router)
 app.include_router(files.router)
 app.include_router(chat.router)
+app.include_router(tool_history.router)
+app.include_router(essay_topic.router)
 
 if __name__ == "__main__":
 

@@ -15,7 +15,7 @@ MODELS = {
     
 }
 
-async def open_router_api(model: str = "openai/gpt-4o", prompt: str = "", files: Optional[List] = None) -> dict:
+async def open_router_api(model: str = "gpt-4o", prompt: str = "", files: Optional[List] = None, response_format: Optional[dict] = None) -> dict:
 
     '''
     OpenRouter API wrapper
@@ -29,6 +29,7 @@ async def open_router_api(model: str = "openai/gpt-4o", prompt: str = "", files:
             url="https://openrouter.ai/api/v1/chat/completions",
             headers={
                 "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
+                "Content-Type": "application/json"
             },
             data=json.dumps({
                 "model": MODELS[model], # optional
@@ -37,7 +38,8 @@ async def open_router_api(model: str = "openai/gpt-4o", prompt: str = "", files:
                     "role": "user",
                     "content": prompt
                 }
-                ]
+                ],
+                **({"response_format": response_format} if response_format else {})
             })
         )
     except Exception as e:
@@ -45,7 +47,7 @@ async def open_router_api(model: str = "openai/gpt-4o", prompt: str = "", files:
 
     return response.json()
 
-async def open_router_api_streaming(model: str = "openai/gpt-4o", prompt: str = "", files: Optional[List] = None):
+async def open_router_api_streaming(model: str = "gpt-4o", prompt: str = "", files: Optional[List] = None, response_format: Optional[dict] = None):
     '''
     OpenRouter API wrapper for streaming. https://openrouter.ai/docs/api-reference/streaming
     Yields: content chunks from OpenRouter API stream
@@ -68,7 +70,8 @@ async def open_router_api_streaming(model: str = "openai/gpt-4o", prompt: str = 
                         "content": prompt
                     }
                 ],
-                "stream": True
+                "stream": True,
+                **({"response_format": response_format} if response_format else {})
             },
             stream=True
         )
