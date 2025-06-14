@@ -1,4 +1,5 @@
-import type { Message, FileItem } from '../app/pages/learningSpace/types';
+import type { FileItem } from '../types/learningSpace';
+import type { Message } from '../app/pages/learningSpace/types';
 
 export interface ChatRequest {
   content: string;
@@ -76,7 +77,6 @@ export class ChatService {
           if (chunk.trim()) {
             chunkCount++;
             fullResponse += chunk;
-            console.log(`Chunk ${chunkCount}: "${chunk.substring(0, 50)}${chunk.length > 50 ? '...' : ''}"`); // Debug log
             
             // Call the chunk callback if provided
             if (onChunk) {

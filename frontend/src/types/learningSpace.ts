@@ -5,7 +5,7 @@ export interface FileItem {
   type: 'pdf' | 'txt' | 'text';
   size: number;
   mimeType: string;
-  uploadedAt: string;
+  uploadedAt: Date;
   extractedText?: string;
   content?: string;
 }

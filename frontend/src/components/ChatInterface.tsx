@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Box, TextInput, Button, ScrollArea, Text, Paper, Group, ActionIcon, Alert } from '@mantine/core';
 import { IconSend, IconRobot, IconUser, IconAlertCircle } from '@tabler/icons-react';
-import type { Message, FileItem } from '../app/pages/learningSpace/types';
+import type { FileItem } from '../types/learningSpace';
+import type { Message } from '../app/pages/learningSpace/types';
 import { ChatService } from '../api/chat';
 
 interface ChatInterfaceProps {

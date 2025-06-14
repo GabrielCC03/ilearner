@@ -38,7 +38,12 @@ export const getFilesForLearningSpace = async (learningSpaceId: string): Promise
     throw new Error(errorData.detail || 'Failed to fetch files');
   }
 
-  return response.json();
+  const files = await response.json();
+  // Convert uploadedAt strings to Date objects
+  return files.map((file: any) => ({
+    ...file,
+    uploadedAt: new Date(file.uploadedAt)
+  }));
 };
 
 /**
@@ -57,7 +62,12 @@ export const getFileById = async (fileId: string): Promise<FileItem> => {
     throw new Error(errorData.detail || 'Failed to fetch file');
   }
 
-  return response.json();
+  const file = await response.json();
+  // Convert uploadedAt string to Date object
+  return {
+    ...file,
+    uploadedAt: new Date(file.uploadedAt)
+  };
 };
 
 /**
@@ -128,9 +138,22 @@ export const deleteFile = async (fileId: string): Promise<void> => {
 export const uploadMultipleFiles = async (
   learningSpaceId: string, 
   files: File[]
-): Promise<FileUploadResponse[]> => {
+): Promise<FileItem[]> => {
   const uploadPromises = files.map(file => uploadFile(learningSpaceId, file));
-  return Promise.all(uploadPromises);
+  const uploadResponses = await Promise.all(uploadPromises);
+  
+  // Convert FileUploadResponse to FileItem with Date objects
+  return uploadResponses.map(response => ({
+    id: response.id,
+    learningSpaceId: response.learningSpaceId,
+    name: response.name,
+    type: response.type as 'pdf' | 'txt' | 'text',
+    size: response.size,
+    mimeType: response.mimeType,
+    uploadedAt: new Date(response.uploadedAt),
+    extractedText: response.extractedText,
+    content: undefined
+  }));
 };
 
 /**

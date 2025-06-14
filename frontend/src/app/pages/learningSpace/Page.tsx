@@ -73,7 +73,6 @@ export default function LearningSpacePage() {
           <ChatInterface 
             learningSpaceId={id}
             files={files}
-            onSendMessage={() => {}}
           />
         </Box>
 
