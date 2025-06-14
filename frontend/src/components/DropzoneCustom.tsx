@@ -42,7 +42,7 @@ export function DropzoneCustom({ onDrop }: DropzoneCustomProps) {
           </Text>
 
           <Text className={classes.description}>
-            Drag and drop files here to upload. Only <i>.pdf</i> and <i>.txt</i>files are supported
+            Drag and drop files here to upload. Only <i>.pdf</i> and <i>.txt</i> files are supported
           </Text>
         </div>
       </Dropzone>
