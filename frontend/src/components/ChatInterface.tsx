@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Box, TextInput, Button, ScrollArea, Text, Paper, Group, ActionIcon, Alert } from '@mantine/core';
 import { IconSend, IconRobot, IconUser, IconAlertCircle } from '@tabler/icons-react';
 import type { Message, FileItem } from '../app/pages/learningSpace/types';
-import { ChatService } from '../lib/chat';
+import { ChatService } from '../api/chat';
 
 interface ChatInterfaceProps {
   learningSpaceId: string;
@@ -28,13 +28,13 @@ export default function ChatInterface({
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new messages are added
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, currentStreamingMessage]);
+  }, [messages, currentStreamingMessage, scrollToBottom]);
 
   // Load chat history on component mount
   useEffect(() => {
@@ -78,7 +78,10 @@ export default function ChatInterface({
     setCurrentStreamingMessage(streamingMessage);
 
     try {
+      // Use a ref to track accumulated content for better performance
       let accumulatedContent = '';
+      let lastUpdateTime = 0;
+      const UPDATE_THROTTLE_MS = 50; // Update UI at most every 50ms
 
       await ChatService.sendMessage(
         userMessage.content,
@@ -89,12 +92,32 @@ export default function ChatInterface({
         (chunk: string) => {
           // Handle streaming chunks
           accumulatedContent += chunk;
-          setCurrentStreamingMessage(prev => prev ? {
-            ...prev,
-            content: accumulatedContent
-          } : null);
+          
+          const now = Date.now();
+          // Throttle updates to prevent UI from being overwhelmed
+          if (now - lastUpdateTime >= UPDATE_THROTTLE_MS) {
+            lastUpdateTime = now;
+            
+            // Update streaming message with accumulated content
+            setCurrentStreamingMessage(prevMessage => {
+              if (!prevMessage) return null;
+              return {
+                ...prevMessage,
+                content: accumulatedContent
+              };
+            });
+          }
         }
       );
+
+      // Ensure final update with all content
+      setCurrentStreamingMessage(prevMessage => {
+        if (!prevMessage) return null;
+        return {
+          ...prevMessage,
+          content: accumulatedContent
+        };
+      });
 
       // Add the final assistant message
       const finalMessage: Message = {
