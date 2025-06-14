@@ -43,7 +43,9 @@ This schema uses separate collections for better scalability, performance, and t
   
   // Essay Tool fields
   prompt: String,
+  topic: String,
   guidelines: String,
+  helpingMaterial: String,
   response: String,
   feedback: {
     score: Number, // 0-100
