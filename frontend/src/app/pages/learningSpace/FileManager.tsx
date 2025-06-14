@@ -232,12 +232,6 @@ export default function FileManager({
                           </Text>
                           <Group gap="xs">
                             <Text size="xs" c="dimmed">
-                              {formatFileSize(file.size)}
-                            </Text>
-                            <Text size="xs" c="dimmed">
-                              •
-                            </Text>
-                            <Text size="xs" c="dimmed">
                               {formatDate(file.uploadedAt)}
                             </Text>
                           </Group>

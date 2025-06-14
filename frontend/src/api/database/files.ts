@@ -1,4 +1,4 @@
-import type { FileItem, FileUploadResponse, FileContentResponse } from '../../types/learningSpace';
+import type { FileItem, FileUploadResponse, FileContentResponse, ExtractedTextResponse } from '../../types/learningSpace';
 
 const API_BASE_URL = 'http://localhost:8000/database/files';
 
@@ -141,6 +141,26 @@ export const getFileUrl = async (fileId: string): Promise<string> => {
 };
 
 /**
+ * Get extracted text from a file
+ */
+export const getFileExtractedText = async (fileId: string): Promise<string> => {
+  const response = await fetch(`${API_BASE_URL}/${fileId}/extracted-text`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Failed to get extracted text');
+  }
+
+  const data: ExtractedTextResponse = await response.json();
+  return data.extractedText;
+};
+
+/**
  * API client object with all file methods
  */
 export const filesApi = {
@@ -150,6 +170,7 @@ export const filesApi = {
   getById: getFileById,
   download: downloadFile,
   getContent: getFileContent,
+  getExtractedText: getFileExtractedText,
   getFileUrl: getFileUrl,
   delete: deleteFile,
 };

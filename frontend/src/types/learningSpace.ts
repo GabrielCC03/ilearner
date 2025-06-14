@@ -6,6 +6,7 @@ export interface FileItem {
   size: number;
   mimeType: string;
   uploadedAt: string;
+  extractedText?: string;
   content?: string;
 }
 
@@ -17,10 +18,15 @@ export interface FileUploadResponse {
   size: number;
   mimeType: string;
   uploadedAt: string;
+  extractedText?: string;
 }
 
 export interface FileContentResponse {
   content: string;
+}
+
+export interface ExtractedTextResponse {
+  extractedText: string;
 }
 
 export interface ChatMessage {

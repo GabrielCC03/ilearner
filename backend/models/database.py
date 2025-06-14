@@ -17,6 +17,7 @@ class File(BaseModel):
     size: int  # File size in bytes
     mimeType: str  # MIME type for uploaded files
     uploadedAt: datetime
+    extractedText: Optional[str] = None  # Content of parsed file into text
     content: Optional[bytes] = None  # Actual file content
 
 class ChatMessage(BaseModel):

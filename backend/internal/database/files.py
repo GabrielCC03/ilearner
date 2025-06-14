@@ -4,6 +4,7 @@ from datetime import datetime
 from models.database import File
 from .MongoConnection import mongo_connection
 from .learning_spaces import update_file_count
+from ..common import parse_file
 
 # Get the files collection
 files_collection = mongo_connection.get_collection('Files')
@@ -19,9 +20,13 @@ def object_id_to_str(doc):
 
 async def create_file(learning_space_id: str, name: str, file_type: str, size: int, mime_type: str, content: bytes) -> File:
     '''
-    Create a new file record with content storage
+    Create a new file record with content storage and text extraction
     '''
     now = datetime.now()
+    
+    # Extract text from the file content
+    extracted_text = parse_file(content, file_type, mime_type)
+    
     file_doc = {
         "learningSpaceId": learning_space_id,
         "name": name,
@@ -29,7 +34,8 @@ async def create_file(learning_space_id: str, name: str, file_type: str, size: i
         "size": size,
         "mimeType": mime_type,
         "uploadedAt": now,
-        "content": Binary(content)  # Store content as BSON Binary
+        "content": Binary(content),  # Store content as BSON Binary
+        "extractedText": extracted_text  # Store extracted text
     }
     
     result = files_collection.insert_one(file_doc)
