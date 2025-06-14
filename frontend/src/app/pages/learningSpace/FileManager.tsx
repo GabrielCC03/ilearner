@@ -214,7 +214,13 @@ export default function FileManager({
                 const isDeleting = deletingFileId === file.id;
                 
                 return (
-                  <Card key={file.id} padding="sm" withBorder onClick={() => handleFileView(file)}>
+                  <Card 
+                    key={file.id} 
+                    padding="sm" 
+                    withBorder 
+                    onClick={() => handleFileView(file)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <Group justify="space-between" wrap="nowrap">
                       <Group gap="sm" className="flex-1 min-w-0">
                         <ThemeIcon variant="light" size="sm">
