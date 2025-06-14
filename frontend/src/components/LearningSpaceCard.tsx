@@ -4,7 +4,7 @@ import { IconBook, IconDots, IconEdit, IconTrash } from '@tabler/icons-react';
 interface LearningSpaceCardProps {
   id: string;
   name: string;
-  createdAt: string;
+  lastUpdated: string;
   fileCount: number;
   onClick: () => void;
   onEdit: () => void;
@@ -13,7 +13,7 @@ interface LearningSpaceCardProps {
 
 export function LearningSpaceCard({ 
   name, 
-  createdAt, 
+  lastUpdated, 
   fileCount, 
   onClick,
   onEdit,
@@ -78,7 +78,7 @@ export function LearningSpaceCard({
           {name}
         </Text>
         <Text size="sm" c="gray.5">
-          {formatDate(createdAt)} • {fileCount} {fileCount === 1 ? 'file' : 'files'}
+          {formatDate(lastUpdated)} • {fileCount} {fileCount === 1 ? 'file' : 'files'}
         </Text>
       </div>
     </Card>

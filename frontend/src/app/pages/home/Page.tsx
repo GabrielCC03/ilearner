@@ -78,13 +78,10 @@ export default function Home() {
     }
   };
 
-  const handleSpaceClick = (spaceId: string) => { 
-    // Update the updatedAt field
-    const updatedSpace = {
-      ...learningSpaces.find(space => space.id === spaceId),
-      updatedAt: new Date().toISOString()
-    };
-    learningSpaceApi.update(spaceId, updatedSpace);
+  const handleSpaceClick = async (spaceId: string) => { 
+    
+    const space = await learningSpaceApi.getById(spaceId);
+    learningSpaceApi.update(spaceId, space);
 
     navigate(`/learning-space/${spaceId}`);
     
@@ -114,7 +111,7 @@ export default function Home() {
         return b.fileCount - a.fileCount;
       case 'recent':
       default:
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
     }
   });
 
@@ -212,7 +209,7 @@ export default function Home() {
                     key={space.id}
                     id={space.id}
                     name={space.name}
-                    createdAt={space.createdAt}
+                    lastUpdated={space.updatedAt}
                     fileCount={space.fileCount}
                     onClick={() => handleSpaceClick(space.id)}
                     onEdit={() => handleEditSpace(space.id)}
