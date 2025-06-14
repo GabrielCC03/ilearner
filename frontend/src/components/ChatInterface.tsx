@@ -1,28 +1,135 @@
-import { useState } from 'react';
-import { Box, TextInput, Button, ScrollArea, Text, Paper, Group, ActionIcon } from '@mantine/core';
-import { IconSend, IconRobot, IconUser } from '@tabler/icons-react';
-import type { Message } from '../app/pages/learningSpace/types';
+import { useState, useEffect, useRef } from 'react';
+import { Box, TextInput, Button, ScrollArea, Text, Paper, Group, ActionIcon, Alert } from '@mantine/core';
+import { IconSend, IconRobot, IconUser, IconAlertCircle } from '@tabler/icons-react';
+import type { Message, FileItem } from '../app/pages/learningSpace/types';
+import { ChatService } from '../lib/chat';
 
 interface ChatInterfaceProps {
-  messages: Message[];
-  onSendMessage: (message: string) => void;
-  isLoading?: boolean;
+  learningSpaceId: string;
+  files?: FileItem[];
+  toolHistoryId?: string | null;
+  model?: string;
 }
 
-export default function ChatInterface({ messages, onSendMessage, isLoading = false }: ChatInterfaceProps) {
+export default function ChatInterface({ 
+  learningSpaceId, 
+  files = [], 
+  toolHistoryId = null,
+  model = 'gpt-4o'
+}: ChatInterfaceProps) {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentStreamingMessage, setCurrentStreamingMessage] = useState<Message | null>(null);
+  
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = () => {
-    if (inputValue.trim() && !isLoading) {
-      onSendMessage(inputValue.trim());
-      setInputValue('');
+  // Auto-scroll to bottom when new messages are added
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, currentStreamingMessage]);
+
+  // Load chat history on component mount
+  useEffect(() => {
+    loadChatHistory();
+  }, [learningSpaceId, toolHistoryId]);
+
+  const loadChatHistory = async () => {
+    try {
+      const history = await ChatService.getChatHistory(learningSpaceId, toolHistoryId);
+      setMessages(history);
+    } catch (error) {
+      console.error('Error loading chat history:', error);
+      setError('Failed to load chat history');
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputValue.trim() || isLoading || isStreaming) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content: inputValue.trim(),
+      sender: 'user',
+      timestamp: new Date(),
+    };
+
+    // Add user message immediately
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsLoading(true);
+    setIsStreaming(true);
+    setError(null);
+
+    // Create a temporary streaming message
+    const streamingMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      content: '',
+      sender: 'assistant',
+      timestamp: new Date(),
+    };
+    setCurrentStreamingMessage(streamingMessage);
+
+    try {
+      let accumulatedContent = '';
+
+      await ChatService.sendMessage(
+        userMessage.content,
+        learningSpaceId,
+        files,
+        model,
+        toolHistoryId,
+        (chunk: string) => {
+          // Handle streaming chunks
+          accumulatedContent += chunk;
+          setCurrentStreamingMessage(prev => prev ? {
+            ...prev,
+            content: accumulatedContent
+          } : null);
+        }
+      );
+
+      // Add the final assistant message
+      const finalMessage: Message = {
+        ...streamingMessage,
+        content: accumulatedContent,
+      };
+
+      setMessages(prev => [...prev, finalMessage]);
+      setCurrentStreamingMessage(null);
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setError('Failed to send message. Please try again.');
+      setCurrentStreamingMessage(null);
+    } finally {
+      setIsLoading(false);
+      setIsStreaming(false);
     }
   };
 
   const handleKeyPress = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
-      handleSend();
+      handleSendMessage();
+    }
+  };
+
+  const clearChat = async () => {
+    try {
+      await ChatService.deleteChatHistory(learningSpaceId, toolHistoryId);
+      setMessages([]);
+      setError(null);
+    } catch (error) {
+      console.error('Error clearing chat:', error);
+      setError('Failed to clear chat history');
     }
   };
 
@@ -30,18 +137,44 @@ export default function ChatInterface({ messages, onSendMessage, isLoading = fal
     <Box className="h-full flex flex-col">
       {/* Header */}
       <Box className="p-4 border-b border-gray-200">
-        <Group gap="sm">
-          <IconRobot size={20} />
-          <Text fw={500} c="gray.7">Chat</Text>
+        <Group justify="space-between">
+          <Group gap="sm">
+            <IconRobot size={20} />
+            <Text fw={500} c="gray.7">Chat</Text>
+          </Group>
+          {messages.length > 0 && (
+            <Button
+              variant="subtle"
+              size="xs"
+              onClick={clearChat}
+              disabled={isLoading}
+            >
+              Clear Chat
+            </Button>
+          )}
         </Group>
         <Text size="sm" c="dimmed" mt="xs">
           Ask questions about your uploaded materials
+          {files.length > 0 && ` (${files.length} file${files.length > 1 ? 's' : ''} available)`}
         </Text>
       </Box>
 
+      {/* Error Alert */}
+      {error && (
+        <Alert 
+          icon={<IconAlertCircle size={16} />} 
+          color="red" 
+          onClose={() => setError(null)}
+          mx="md"
+          mt="md"
+        >
+          {error}
+        </Alert>
+      )}
+
       {/* Messages */}
-      <ScrollArea className="flex-1 px-4 py-2">
-        {messages.length === 0 ? (
+      <ScrollArea className="flex-1 px-4 py-2" ref={scrollAreaRef}>
+        {messages.length === 0 && !currentStreamingMessage ? (
           <Box className="flex items-center justify-center h-full">
             <Text size="sm" c="dimmed" ta="center">
               Start a conversation by asking a question about your materials
@@ -69,26 +202,30 @@ export default function ChatInterface({ messages, onSendMessage, isLoading = fal
                     {message.timestamp.toLocaleTimeString()}
                   </Text>
                 </Group>
-                <Text size="sm">
+                <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
                   {message.content}
                 </Text>
               </Paper>
             ))}
-            {isLoading && (
+            
+            {/* Streaming message */}
+            {currentStreamingMessage && (
               <Paper p="md" className="max-w-[80%] mr-auto bg-gray-50">
                 <Group gap="xs" mb="xs">
                   <IconRobot size={16} />
                   <Text size="xs" c="dimmed">
-                    Now
+                    {currentStreamingMessage.timestamp.toLocaleTimeString()}
                   </Text>
                 </Group>
-                <Text size="sm" c="dimmed">
-                  Thinking...
+                <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
+                  {currentStreamingMessage.content}
+                  <span className="animate-pulse">|</span>
                 </Text>
               </Paper>
             )}
           </Box>
         )}
+        <div ref={messagesEndRef} />
       </ScrollArea>
 
       {/* Input */}
@@ -105,8 +242,9 @@ export default function ChatInterface({ messages, onSendMessage, isLoading = fal
           <ActionIcon
             variant="filled"
             size="lg"
-            onClick={handleSend}
+            onClick={handleSendMessage}
             disabled={!inputValue.trim() || isLoading}
+            loading={isStreaming}
           >
             <IconSend size={16} />
           </ActionIcon>

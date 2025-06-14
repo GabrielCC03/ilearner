@@ -43,10 +43,60 @@ def open_router_api(model: str = "openai/gpt-4o", message: str = "") -> dict:
 
     return response.json()
 
-#TODO: For streaming: https://openrouter.ai/docs/api-reference/streaming
-def open_router_api_streaming(model: str = "openai/gpt-4o", message: str = "") -> dict:
+def open_router_api_streaming(model: str = "openai/gpt-4o", message: str = ""):
     '''
-    OpenRouter API wrapper for streaming
-    Returns: response from OpenRouter API
+    OpenRouter API wrapper for streaming. https://openrouter.ai/docs/api-reference/streaming
+    Yields: content chunks from OpenRouter API stream
     '''
-    pass
+    try:
+        response = requests.post(
+            url="https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": MODELS[model],
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": message
+                    }
+                ],
+                "stream": True
+            },
+            stream=True
+        )
+        
+        buffer = ""
+        for chunk in response.iter_content(chunk_size=1024, decode_unicode=True):
+            buffer += chunk
+            while True:
+                try:
+                    # Find the next complete SSE line
+                    line_end = buffer.find('\n')
+                    if line_end == -1:
+                        break
+                    
+                    line = buffer[:line_end].strip()
+                    buffer = buffer[line_end + 1:]
+                    
+                    if line.startswith('data: '):
+                        data = line[6:]
+                        if data == '[DONE]':
+                            return
+                        
+                        try:
+                            data_obj = json.loads(data)
+                            content = data_obj["choices"][0]["delta"].get("content")
+                            if content:
+                                yield content
+                        except json.JSONDecodeError:
+                            # Skip non-JSON payloads (like comments)
+                            pass
+                except Exception:
+                    break
+                    
+    except Exception as e:
+        print("Error in OpenRouter API streaming", e)
+        yield f"Error: Failed to get streaming response from OpenRouter API - {str(e)}"

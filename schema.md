@@ -89,7 +89,7 @@ This schema uses separate collections for better scalability, performance, and t
   
 }
 
-### 4. Chat Collection
+### 4. ChatMessages Collection
 
 {
   _id: ObjectId,

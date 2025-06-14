@@ -19,7 +19,7 @@ class File(BaseModel):
     uploadedAt: datetime
     content: Optional[bytes] = None  # Actual file content
 
-class Chat(BaseModel):
+class ChatMessage(BaseModel):
     id: str
     learningSpaceId: str  # Reference to LearningSpaces._id
     toolHistoryId: Optional[str] = None  # Reference to ToolHistory._id (null for general learning space chat)

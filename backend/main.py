@@ -4,7 +4,7 @@ import uvicorn
 import asyncio
 import os
 from dotenv import load_dotenv
-from routers import template, common
+from routers import template, common, chat
 from routers.database import files, learning_spaces
 
 
@@ -23,6 +23,7 @@ app.include_router(template.router)
 app.include_router(common.router)
 app.include_router(learning_spaces.router)
 app.include_router(files.router)
+app.include_router(chat.router)
 
 if __name__ == "__main__":
 
