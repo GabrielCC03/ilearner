@@ -13,7 +13,8 @@ async def send_chat_message_with_streaming(
     user_message: str,
     model: str = "gpt-4o",
     tool_history_id: Optional[str] = None,
-    context_limit: int = 10
+    context_limit: int = 10,
+    files: Optional[List] = None
 ) -> AsyncGenerator[str, None]:
     """
     Send a chat message and get a streaming response from OpenRouter.
@@ -30,46 +31,73 @@ async def send_chat_message_with_streaming(
         String chunks of the assistant's response
     """
     
+    print(f"Starting chat streaming for space: {learning_space_id}, model: {model}")
+    
     # 1. Save the user's message to the database
-    user_chat_message = await create_chat_message(
-        learning_space_id=learning_space_id,
-        role="user",
-        content=user_message,
-        tool_history_id=tool_history_id
-    )
+    try:
+        print("Saving user message to database...")
+        user_chat_message = await create_chat_message(
+            learning_space_id=learning_space_id,
+            role="user",
+            content=user_message,
+            tool_history_id=tool_history_id
+        )
+        print(f"User message saved with ID: {user_chat_message.id}")
+    except Exception as e:
+        print(f"Error saving user message: {e}")
+        yield f"Error saving message: {str(e)}"
+        return
     
     # 2. Get recent conversation context
-    recent_messages = await get_latest_chat_messages(
-        learning_space_id=learning_space_id,
-        tool_history_id=tool_history_id,
-        limit=context_limit
-    )
+    try:
+        print("Getting recent conversation context...")
+        recent_messages = await get_latest_chat_messages(
+            learning_space_id=learning_space_id,
+            tool_history_id=tool_history_id,
+            limit=context_limit
+        )
+        print(f"Retrieved {len(recent_messages)} recent messages")
+    except Exception as e:
+        print(f"Error getting recent messages: {e}")
+        recent_messages = []
     
     # 3. Build the conversation context for the model
+    print("Building conversation context...")
     conversation_context = build_conversation_context(recent_messages, user_message)
+    print(f"Context built, length: {len(conversation_context)} characters")
     
     # 4. Stream the response from OpenRouter
     assistant_response = ""
     try:
+        print("Starting OpenRouter API streaming...")
         async for chunk in async_stream_wrapper(
-            open_router_api_streaming(model=model, message=conversation_context)
+            open_router_api_streaming(model=model, message=conversation_context, files=files)
         ):
             assistant_response += chunk
+            print(f"Received chunk: {repr(chunk[:30])}")
             yield chunk
             
     except Exception as e:
+        print(f"Error in OpenRouter streaming: {e}")
         error_message = f"Error getting response: {str(e)}"
         assistant_response = error_message
         yield error_message
     
     # 5. Save the complete assistant response to the database
     if assistant_response:
-        await create_chat_message(
-            learning_space_id=learning_space_id,
-            role="assistant",
-            content=assistant_response,
-            tool_history_id=tool_history_id
-        )
+        try:
+            print("Saving assistant response to database...")
+            await create_chat_message(
+                learning_space_id=learning_space_id,
+                role="assistant",
+                content=assistant_response,
+                tool_history_id=tool_history_id
+            )
+            print("Assistant response saved successfully")
+        except Exception as e:
+            print(f"Error saving assistant response: {e}")
+    else:
+        print("No assistant response to save")
 
 def build_conversation_context(recent_messages: List[ChatMessage], current_message: str) -> str:
     """

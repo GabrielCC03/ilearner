@@ -1,7 +1,7 @@
 import requests
 import json
 import os
-
+from typing import Optional, List
 MODELS = {
     # Selected models for this API
     "gpt-4o": "openai/gpt-4o",
@@ -13,7 +13,7 @@ MODELS = {
     
 }
 
-def open_router_api(model: str = "openai/gpt-4o", message: str = "") -> dict:
+def open_router_api(model: str = "openai/gpt-4o", message: str = "", files: Optional[List] = None) -> dict:
 
     '''
     OpenRouter API wrapper
@@ -43,7 +43,7 @@ def open_router_api(model: str = "openai/gpt-4o", message: str = "") -> dict:
 
     return response.json()
 
-def open_router_api_streaming(model: str = "openai/gpt-4o", message: str = ""):
+def open_router_api_streaming(model: str = "openai/gpt-4o", message: str = "", files: Optional[List] = None):
     '''
     OpenRouter API wrapper for streaming. https://openrouter.ai/docs/api-reference/streaming
     Yields: content chunks from OpenRouter API stream

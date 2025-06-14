@@ -71,7 +71,8 @@ export default function LearningSpacePage() {
         {/* Center Panel - Chat Interface */}
         <Box className="col-span-6 bg-white h-full min-h-0">
           <ChatInterface 
-            messages={[]}
+            learningSpaceId={id}
+            files={files}
             onSendMessage={() => {}}
           />
         </Box>
