@@ -101,14 +101,7 @@ This schema uses separate collections for better scalability, performance, and t
   content: String,
   timestamp: Date,
   
-  // Context information
-  contextType: String, // 'general', 'essay', 'mcq', etc.
-  
   // Message metadata
   messageId: String, // Unique identifier for this message
   
-  // AI metadata (for assistant messages)
-  model: String, // AI model used (e.g., 'gpt-4', 'claude-3')
-  tokens: Number, // Token count for this message
-  responseTime: Number, // Time taken to generate response (ms)
 }

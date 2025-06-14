@@ -72,40 +72,12 @@
 ## Back-End Development
 
 - **Framework**: FastAPI (Python)
-- **Core Endpoints**:
-  - `POST /spaces`  
-    - Create a new Learning Space  
-  - `GET /spaces`  
-    - List all Learning Spaces  
-  - `GET /spaces/{space_id}`  
-    - Get metadata and file list for one space  
-  - `DELETE /spaces/{space_id}`  
-    - Delete a Learning Space
-  - `POST /spaces/{space_id}/files`  
-    - Upload PDF/TXT/link/text  
-  - `GET /spaces/{space_id}/files`  
-    - List files in a space  
-  - `DELETE /spaces/{space_id}/files/{file_id}`  
-    - Delete a file  
-  - `POST /spaces/{space_id}/generate/essay`  
-    - Generate essay prompt & guidelines  
-  - `POST /spaces/{space_id}/generate/quiz`  
-    - Generate multiple-choice quiz  
-  - `POST /spaces/{space_id}/submit/essay`  
-    - Grade essay submission  
-  - `POST /spaces/{space_id}/submit/quiz`  
-    - Grade quiz submission  
-  - `POST /spaces/{space_id}/chat` or WebSocket  
-    - Tutoring chatbot messages
 
 ## Containerization & Deployment
 
 - **Docker**  
   - Dockerfile for frontend  
   - Dockerfile for backend  
-- **Kubernetes**  
-  - Deployment & Service manifests or Helm chart  
-  - PersistentVolume for file storage
 
 ## Submission Guidelines
 
@@ -127,7 +99,3 @@
 - **Documentation**: Clarity of README and comments  
 - **User Experience**: Intuitive and responsive UI  
 - **Scope Management**: Appropriate feature scope with notes on gaps
-
-## Timeline
-
-- Complete and submit the solution within **72 hours** of starting the challenge.

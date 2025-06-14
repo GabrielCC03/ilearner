@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Box, TextInput, Button, ScrollArea, Text, Paper, Group, ActionIcon } from '@mantine/core';
 import { IconSend, IconRobot, IconUser } from '@tabler/icons-react';
-import type { Message } from './types';
+import type { Message } from '../app/pages/learningSpace/types';
 
 interface ChatInterfaceProps {
   messages: Message[];

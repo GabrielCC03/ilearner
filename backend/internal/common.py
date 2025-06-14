@@ -44,3 +44,9 @@ def open_router_api(model: str = "openai/gpt-4o", message: str = "") -> dict:
     return response.json()
 
 #TODO: For streaming: https://openrouter.ai/docs/api-reference/streaming
+def open_router_api_streaming(model: str = "openai/gpt-4o", message: str = "") -> dict:
+    '''
+    OpenRouter API wrapper for streaming
+    Returns: response from OpenRouter API
+    '''
+    pass
