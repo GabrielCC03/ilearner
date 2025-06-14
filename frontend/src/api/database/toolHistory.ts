@@ -32,6 +32,21 @@ export const getForLearningSpace = async (
   return response.json();
 };
 
+/**
+ * Delete a tool history entry by ID
+ */
+export const deleteToolHistory = async (toolHistoryId: string): Promise<void> => {
+  const response = await fetch(`${API_BASE_URL}/${toolHistoryId}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Failed to delete tool history');
+  }
+};
+
 export const toolHistoryApi = {
-  getForLearningSpace
+  getForLearningSpace,
+  deleteToolHistory
 };

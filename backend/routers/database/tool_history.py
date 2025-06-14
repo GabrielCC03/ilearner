@@ -6,7 +6,8 @@ from internal.database.tool_history import (
     get_tool_history,
     update_tool_history,
     update_tool_data,
-    get_tool_history_by_learning_space
+    get_tool_history_by_learning_space,
+    delete_tool_history
 )
 
 router = APIRouter(prefix="/database/tool-history", tags=["tool-history"])
@@ -93,16 +94,33 @@ async def get_tool_history_by_learning_space_endpoint(learning_space_id: str):
     """
     Get all tool history entries for a learning space
     """
-    print(f"Getting tool history for learning space: {learning_space_id}")
     try:
-        print(f"Getting tool history for learning space: {learning_space_id}")
         tool_histories = await get_tool_history_by_learning_space(learning_space_id)
-        print(f"Tool histories: {tool_histories}")
         return tool_histories
     except Exception as e:
         print(f"Error getting tool histories: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve tool histories: {str(e)}"
+        )
+
+@router.delete("/{tool_history_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_tool_history_endpoint(tool_history_id: str):
+    """
+    Delete a tool history entry by ID
+    """
+    try:
+        deleted = await delete_tool_history(tool_history_id)
+        if not deleted:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Tool history not found"
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete tool history: {str(e)}"
         )
 

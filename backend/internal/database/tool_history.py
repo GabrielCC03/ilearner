@@ -55,7 +55,7 @@ async def get_tool_history(tool_history_id: str) -> Optional[ToolHistory]:
     """
     collection = tool_history_collection
     
-    doc = await collection.find_one({"_id": ObjectId(tool_history_id)})
+    doc = collection.find_one({"_id": ObjectId(tool_history_id)})
     
     if not doc:
         return None
@@ -84,7 +84,7 @@ async def update_tool_history(tool_history_id: str, update_data: Dict[str, Any])
     if "learningSpaceId" in update_data:
         update_data["learningSpaceId"] = ObjectId(update_data["learningSpaceId"])
     
-    result = await collection.update_one(
+    result = collection.update_one(
         {"_id": ObjectId(tool_history_id)},
         {"$set": update_data}
     )
@@ -107,7 +107,7 @@ async def update_tool_data(tool_history_id: str, tool_data_updates: Dict[str, An
     for key, value in tool_data_updates.items():
         update_ops[f"toolData.{key}"] = value
     
-    result = await collection.update_one(
+    result = collection.update_one(
         {"_id": ObjectId(tool_history_id)},
         {"$set": update_ops}
     )
@@ -142,3 +142,11 @@ async def get_tool_history_by_learning_space(learning_space_id: str) -> List[Too
         ))
 
     return tool_histories
+
+async def delete_tool_history(tool_history_id: str) -> bool:
+    """
+    Delete a tool history entry by ID
+    """
+    collection = tool_history_collection
+    result = collection.delete_one({"_id": ObjectId(tool_history_id)})
+    return result.deleted_count > 0

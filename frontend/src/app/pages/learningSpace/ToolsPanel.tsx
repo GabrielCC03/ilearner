@@ -1,5 +1,5 @@
-import { Box, Text, Button, Stack, Card, Group, ThemeIcon, Divider, ScrollArea } from '@mantine/core';
-import { IconBrain, IconFileText, IconHistory } from '@tabler/icons-react';
+import { Box, Text, Button, Stack, Card, Group, ThemeIcon, Divider, ScrollArea, Menu, ActionIcon } from '@mantine/core';
+import { IconBrain, IconFileText, IconHistory, IconDots, IconTrash } from '@tabler/icons-react';
 import type { Tool, HistoryItem } from './types';
 import type { FileItem } from '../../../types/learningSpace';
 import { formatDate } from '../../../api/common';
@@ -10,9 +10,10 @@ interface ToolsPanelProps {
   history: HistoryItem[];
   learningSpaceId: string;
   files: FileItem[];
+  onDeleteHistory: (toolHistoryId: string) => void;
 }
 
-export default function ToolsPanel({ tools, history, learningSpaceId, files }: ToolsPanelProps) {
+export default function ToolsPanel({ tools, history, learningSpaceId, files, onDeleteHistory }: ToolsPanelProps) {
 
   const getHistoryIcon = (type: string) => {
     switch (type) {
@@ -90,25 +91,49 @@ export default function ToolsPanel({ tools, history, learningSpaceId, files }: T
               {history.map((item) => {
                 const HistoryIcon = getHistoryIcon(item.type);
                 return (
-                  <Card 
-                    key={item.id} 
-                    padding="sm" 
-                    withBorder 
-                    className="cursor-pointer hover:shadow-sm transition-shadow"
+                  <Card
+                    key={item.id}
+                    padding="sm"
+                    withBorder
                     onClick={item.onClick}
+                    style={{ cursor: 'pointer' }}
                   >
-                    <Group gap="sm" wrap="nowrap">
-                      <ThemeIcon variant="light" size="sm" color="gray">
-                        <HistoryIcon size={14} />
-                      </ThemeIcon>
-                      <Box className="flex-1 min-w-0">
-                        <Text size="sm" truncate>
-                          {item.name}
-                        </Text>
-                        <Text size="xs" c="dimmed">
-                          {formatDate(item.createdAt)}
-                        </Text>
-                      </Box>
+                    <Group justify="space-between" wrap="nowrap">
+                      <Group gap="sm" className="flex-1 min-w-0">
+                        <ThemeIcon variant="light" size="sm" color="gray">
+                          <HistoryIcon size={16} />
+                        </ThemeIcon>
+                        <Box className="flex-1 min-w-0">
+                          <Text size="sm" truncate title={item.name}>
+                            {item.name}
+                          </Text>
+                          <Text size="xs" c="dimmed">
+                            {formatDate(item.createdAt)}
+                          </Text>
+                        </Box>
+                      </Group>
+                      <Group gap="xs">
+                        <Menu shadow="md" width={150}>
+                          <Menu.Target>
+                            <ActionIcon
+                              variant="subtle"
+                              size="sm"
+                              onClick={(e) => { e.stopPropagation(); }}
+                            >
+                              <IconDots size={14} />
+                            </ActionIcon>
+                          </Menu.Target>
+                          <Menu.Dropdown>
+                            <Menu.Item
+                              leftSection={<IconTrash size={14} />}
+                              color="red"
+                              onClick={(e) => { e.stopPropagation(); onDeleteHistory(item.id); }}
+                            >
+                              Delete
+                            </Menu.Item>
+                          </Menu.Dropdown>
+                        </Menu>
+                      </Group>
                     </Group>
                   </Card>
                 );

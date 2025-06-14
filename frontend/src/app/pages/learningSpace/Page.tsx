@@ -64,6 +64,16 @@ export default function LearningSpacePage() {
     }
   }, [id, files, navigate]);
 
+  // Handler to delete a tool history entry
+  const handleDeleteHistory = async (toolHistoryId: string) => {
+    try {
+      await toolHistoryApi.deleteToolHistory(toolHistoryId);
+      setHistory(prev => prev.filter(h => h.id !== toolHistoryId));
+    } catch (err) {
+      console.error('Failed to delete tool history:', err);
+    }
+  };
+
   const fetchFiles = async (learningSpaceId: string) => {
     try {
       setFilesLoading(true);
@@ -127,6 +137,7 @@ export default function LearningSpacePage() {
             history={history}
             learningSpaceId={id}
             files={files}
+            onDeleteHistory={handleDeleteHistory}
           />
         </Box>
       </Box>
