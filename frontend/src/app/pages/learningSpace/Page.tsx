@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
 import { Box } from '@mantine/core';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import FileManager from './FileManager';
 import ChatInterface from '../../../components/ChatInterface';
 import ToolsPanel from './ToolsPanel';
 import { Header } from '../../../components';
 import { filesApi } from '../../../api/database/files';
+import { toolHistoryApi } from '../../../api/database/toolHistory';
 import type { FileItem } from '../../../types/learningSpace';
+import type { HistoryItem } from './types';
 
 export default function LearningSpacePage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [files, setFiles] = useState<FileItem[]>([]);
   const [filesLoading, setFilesLoading] = useState(true);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
 
   // Fetch files when learning space loads
   useEffect(() => {
@@ -19,6 +23,46 @@ export default function LearningSpacePage() {
       fetchFiles(id);
     }
   }, [id]);
+
+  // Fetch tool history when learning space loads
+  useEffect(() => {
+    if (id) {
+      const fetchHistory = async () => {
+        try {
+          const data = await toolHistoryApi.getForLearningSpace(id);
+          const items: HistoryItem[] = data.map((h) => {
+            const itemType: HistoryItem['type'] =
+              h.type === 'essay'
+                ? 'essay'
+                : h.type === 'quiz'
+                ? 'quiz'
+                : 'summary';
+            const name =
+              h.toolData?.topic ?? h.type.charAt(0).toUpperCase() + h.type.slice(1);
+            return {
+              id: h.id,
+              name,
+              type: itemType,
+              createdAt: new Date(h.createdAt),
+              onClick: () => {
+                const route =
+                  h.type === 'essay' ? '/tools/essay-topic' : `/tools/${h.type}`;
+                const toolId = h.type === 'essay' ? 'essay-topics' : h.type;
+                navigate(route, {
+                  state: { learningSpaceId: id, files, toolId, toolHistoryId: h.id }
+                });
+              }
+            };
+          });
+          setHistory(items);
+        } catch (error) {
+          console.error('Error fetching tool history:', error);
+        }
+      };
+
+      fetchHistory();
+    }
+  }, [id, files, navigate]);
 
   const fetchFiles = async (learningSpaceId: string) => {
     try {
@@ -77,11 +121,10 @@ export default function LearningSpacePage() {
         </Box>
 
         {/* Right Panel - Tools */}
-        {/* TODO: Add tools panel and make it work */}
         <Box className="col-span-3 bg-gray-50 h-full min-h-0">
           <ToolsPanel 
             tools={[]}
-            history={[]}
+            history={history}
             learningSpaceId={id}
             files={files}
           />

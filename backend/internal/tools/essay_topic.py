@@ -19,6 +19,7 @@ async def generate_essay_instructions(learning_space_id: str, files: List[File])
     # Create prompt for OpenRouter
     prompt = f"""
     Based on the following uploaded educational materials, generate an essay assignment that would test the student's understanding and critical thinking skills.
+    The assignment should focus on the key concepts and ideas from the materials.
 
     Educational Materials:
     {combined_content}

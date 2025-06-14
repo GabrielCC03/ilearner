@@ -93,11 +93,16 @@ async def get_tool_history_by_learning_space_endpoint(learning_space_id: str):
     """
     Get all tool history entries for a learning space
     """
+    print(f"Getting tool history for learning space: {learning_space_id}")
     try:
+        print(f"Getting tool history for learning space: {learning_space_id}")
         tool_histories = await get_tool_history_by_learning_space(learning_space_id)
+        print(f"Tool histories: {tool_histories}")
         return tool_histories
     except Exception as e:
+        print(f"Error getting tool histories: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve tool histories: {str(e)}"
         )
+

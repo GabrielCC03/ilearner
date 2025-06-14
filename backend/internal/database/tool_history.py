@@ -126,10 +126,10 @@ async def get_tool_history_by_learning_space(learning_space_id: str) -> List[Too
     
     cursor = collection.find({
         "learningSpaceId": ObjectId(learning_space_id)
-    }).sort("createdAt", -1)  # Sort by most recent first
-    
+    }).sort("createdAt", -1)
+
     tool_histories = []
-    async for doc in cursor:
+    for doc in cursor:
         tool_histories.append(ToolHistory(
             id=str(doc["_id"]),
             learningSpaceId=str(doc["learningSpaceId"]),
@@ -140,5 +140,5 @@ async def get_tool_history_by_learning_space(learning_space_id: str) -> List[Too
             toolData=doc.get("toolData"),
             tags=doc.get("tags")
         ))
-    
+
     return tool_histories

@@ -59,6 +59,7 @@ async def submit_essay(tool_history_id: str, submission: str) -> Dict[str, Any]:
     Step 2: Submit student essay and generate feedback
     Updates the tool history with the essay and generates comprehensive feedback
     """
+
     try:
         # Get existing tool history
         tool_history = await get_tool_history(tool_history_id)
@@ -89,12 +90,12 @@ async def submit_essay(tool_history_id: str, submission: str) -> Dict[str, Any]:
         tool_data_updates = {
             "response": submission,
             "feedback": {
-                "score": feedback_result["score"],
-                "strengths": feedback_result["strengths"],
-                "improvements": feedback_result["improvements"],
-                "detailedFeedback": feedback_result["detailedFeedback"]
+                "score": feedback_result.get("score", 0),
+                "strengths": feedback_result.get("strengths", []),
+                "improvements": feedback_result.get("improvements", []),
+                "detailedFeedback": feedback_result.get("detailedFeedback", "")
             },
-            "rubric": feedback_result["rubric"],
+            "rubric": feedback_result.get("rubric", []),
             "status": "completed"
         }
         
@@ -103,30 +104,30 @@ async def submit_essay(tool_history_id: str, submission: str) -> Dict[str, Any]:
         
         return {
             "feedback": {
-                "score": feedback_result["score"],
-                "overallStrengths": feedback_result["strengths"],
-                "overallImprovements": feedback_result["improvements"],
-                "detailedFeedback": feedback_result["detailedFeedback"],
+                "score": feedback_result.get("score", 0),
+                "overallStrengths": feedback_result.get("strengths", []),
+                "overallImprovements": feedback_result.get("improvements", []),
+                "detailedFeedback": feedback_result.get("detailedFeedback", ""),
                 "rubricScores": {
                     "understandingAccuracy": {
-                        "score": feedback_result["rubric"][0]["score"],
-                        "maxScore": feedback_result["rubric"][0]["maxScore"],
-                        "feedback": feedback_result["rubric"][0]["feedback"]
+                        "score": feedback_result.get("rubric", [])[0].get("score", 0),
+                        "maxScore": feedback_result.get("rubric", [])[0].get("maxScore", 0),
+                        "feedback": feedback_result.get("rubric", [])[0].get("feedback", "")
                     },
                     "clarityOrganization": {
-                        "score": feedback_result["rubric"][1]["score"],
-                        "maxScore": feedback_result["rubric"][1]["maxScore"],
-                        "feedback": feedback_result["rubric"][1]["feedback"]
+                        "score": feedback_result.get("rubric", [])[1].get("score", 0),
+                        "maxScore": feedback_result.get("rubric", [])[1].get("maxScore", 0),
+                        "feedback": feedback_result.get("rubric", [])[1].get("feedback", "")
                     },
                     "criticalThinking": {
-                        "score": feedback_result["rubric"][2]["score"],
-                        "maxScore": feedback_result["rubric"][2]["maxScore"],
-                        "feedback": feedback_result["rubric"][2]["feedback"]
+                        "score": feedback_result.get("rubric", [])[2].get("score", 0),
+                        "maxScore": feedback_result.get("rubric", [])[2].get("maxScore", 0),
+                        "feedback": feedback_result.get("rubric", [])[2].get("feedback", "")
                     },
                     "languageGrammar": {
-                        "score": feedback_result["rubric"][3]["score"],
-                        "maxScore": feedback_result["rubric"][3]["maxScore"],
-                        "feedback": feedback_result["rubric"][3]["feedback"]
+                        "score": feedback_result.get("rubric", [])[3].get("score", 0),
+                        "maxScore": feedback_result.get("rubric", [])[3].get("maxScore", 0),
+                        "feedback": feedback_result.get("rubric", [])[3].get("feedback", "")
                     }
                 }
             }
@@ -143,7 +144,7 @@ async def submit_essay(tool_history_id: str, submission: str) -> Dict[str, Any]:
 @router.get("/history/{tool_history_id}")
 async def get_essay_history(tool_history_id: str) -> Dict[str, Any]:
     """
-    Get essay tool history for reopening completed essays
+    Get essay tool history for reopening completed or in progress essays
     Used when user clicks on essay tool history from learning space
     """
     try:
@@ -180,30 +181,30 @@ async def get_essay_history(tool_history_id: str) -> Dict[str, Any]:
             rubric_data = tool_data["rubric"]
             
             response_data["feedback"] = {
-                "score": feedback_data["score"],
-                "overallStrengths": feedback_data["strengths"],
-                "overallImprovements": feedback_data["improvements"], 
-                "detailedFeedback": feedback_data["detailedFeedback"],
+                "score": feedback_data.get("score", 0),
+                "overallStrengths": feedback_data.get("strengths", []),
+                "overallImprovements": feedback_data.get("improvements", []), 
+                "detailedFeedback": feedback_data.get("detailedFeedback", ""),
                 "rubricScores": {
                     "understandingAccuracy": {
-                        "score": rubric_data[0]["score"],
-                        "maxScore": rubric_data[0]["maxScore"],
-                        "feedback": rubric_data[0]["feedback"]
+                        "score": rubric_data[0].get("score", 0),
+                        "maxScore": rubric_data[0].get("maxScore", 0),
+                        "feedback": rubric_data[0].get("feedback", "")
                     },
                     "clarityOrganization": {
-                        "score": rubric_data[1]["score"],
-                        "maxScore": rubric_data[1]["maxScore"],
-                        "feedback": rubric_data[1]["feedback"]
+                        "score": rubric_data[1].get("score", 0),
+                        "maxScore": rubric_data[1].get("maxScore", 0),
+                        "feedback": rubric_data[1].get("feedback", "")
                     },
                     "criticalThinking": {
-                        "score": rubric_data[2]["score"],
-                        "maxScore": rubric_data[2]["maxScore"],
-                        "feedback": rubric_data[2]["feedback"]
+                        "score": rubric_data[2].get("score", 0),
+                        "maxScore": rubric_data[2].get("maxScore", 0),
+                        "feedback": rubric_data[2].get("feedback", "")
                     },
                     "languageGrammar": {
-                        "score": rubric_data[3]["score"],
-                        "maxScore": rubric_data[3]["maxScore"],
-                        "feedback": rubric_data[3]["feedback"]
+                        "score": rubric_data[3].get("score", 0),
+                        "maxScore": rubric_data[3].get("maxScore", 0),
+                        "feedback": rubric_data[3].get("feedback", "")
                     }
                 }
             }
