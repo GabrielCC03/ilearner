@@ -232,7 +232,7 @@ export default function FileManager({
                           </Text>
                           <Group gap="xs">
                             <Text size="xs" c="dimmed">
-                              {formatDate(file.uploadedAt)}
+                              {formatDate(String(file.uploadedAt))}
                             </Text>
                           </Group>
                         </Box>
