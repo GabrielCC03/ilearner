@@ -25,11 +25,9 @@ async def send_chat_message(request: ChatRequest):
     """
 
     try:
-        print(f"Received chat request: {request}")
         
         async def generate_response():
             try:
-                print("Starting streaming response generation...")
                 chunk_count = 0
                 async for chunk in send_chat_message_with_streaming(
                     learning_space_id=request.learning_space_id,
@@ -39,14 +37,10 @@ async def send_chat_message(request: ChatRequest):
                     files=request.files
                 ):
                     chunk_count += 1
-                    print(f"Yielding chunk {chunk_count}: {repr(chunk[:50])}")
                     yield chunk
-                
-                print(f"Finished streaming. Total chunks: {chunk_count}")
                 
             except Exception as e:
                 error_msg = f"Error in streaming generation: {str(e)}"
-                print(error_msg)
                 yield error_msg
 
         return StreamingResponse(
@@ -54,7 +48,6 @@ async def send_chat_message(request: ChatRequest):
             media_type="text/plain"
         )
     except Exception as e:
-        print(f"Error in send_chat_message: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to process chat message: {str(e)}"

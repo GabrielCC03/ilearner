@@ -13,13 +13,12 @@ MODELS = {
     
 }
 
-def open_router_api(model: str = "openai/gpt-4o", message: str = "", files: Optional[List] = None) -> dict:
+async def open_router_api(model: str = "openai/gpt-4o", message: str = "", files: Optional[List] = None) -> dict:
 
     '''
     OpenRouter API wrapper
     Returns: response from OpenRouter API
     '''
-    print(os.getenv('OPENROUTER_API_KEY'))
     try:
 
         response = requests.post(
@@ -38,12 +37,11 @@ def open_router_api(model: str = "openai/gpt-4o", message: str = "", files: Opti
             })
         )
     except Exception as e:
-        print("Error in OpenRouter API", e)
-        return {"error": "Failed to get response from OpenRouter API"}
+        return {"error": f"Failed to get response from OpenRouter API {e}"}
 
     return response.json()
 
-def open_router_api_streaming(model: str = "openai/gpt-4o", message: str = "", files: Optional[List] = None):
+async def open_router_api_streaming(model: str = "openai/gpt-4o", message: str = "", files: Optional[List] = None):
     '''
     OpenRouter API wrapper for streaming. https://openrouter.ai/docs/api-reference/streaming
     Yields: content chunks from OpenRouter API stream
@@ -98,5 +96,4 @@ def open_router_api_streaming(model: str = "openai/gpt-4o", message: str = "", f
                     break
                     
     except Exception as e:
-        print("Error in OpenRouter API streaming", e)
         yield f"Error: Failed to get streaming response from OpenRouter API - {str(e)}"
