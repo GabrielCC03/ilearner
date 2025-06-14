@@ -22,3 +22,6 @@ class EssayToolData(BaseModel):
     response: Optional[str] = None  # Student's essay
     feedback: Optional[EssayFeedback] = None
     rubric: Optional[List[RubricCriteria]] = None
+
+class EssaySubmission(BaseModel):
+    essay_text: str

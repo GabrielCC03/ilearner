@@ -4,6 +4,7 @@ from models.database import ToolHistory
 from internal.database.tool_history import create_tool_history, update_tool_data, get_tool_history
 from internal.database.files import get_files_by_learning_space
 from internal.tools.essay_topic import generate_essay_instructions, generate_essay_feedback
+from models.tools import EssaySubmission
 
 router = APIRouter(prefix="/tools/essay-topic", tags=["essay-topic-tool"])
 
@@ -54,7 +55,7 @@ async def generate_essay_topic(learning_space_id: str) -> Dict[str, Any]:
         )
 
 @router.post("/submit/{tool_history_id}")
-async def submit_essay(tool_history_id: str, submission: str) -> Dict[str, Any]:
+async def submit_essay(tool_history_id: str, submission: EssaySubmission) -> Dict[str, Any]:
     """
     Step 2: Submit student essay and generate feedback
     Updates the tool history with the essay and generates comprehensive feedback
@@ -84,11 +85,11 @@ async def submit_essay(tool_history_id: str, submission: str) -> Dict[str, Any]:
         }
         
         # Generate feedback using AI
-        feedback_result = await generate_essay_feedback(submission, essay_instructions)
+        feedback_result = await generate_essay_feedback(submission.essay_text, essay_instructions)
         
         # Update tool history with essay and feedback
         tool_data_updates = {
-            "response": submission,
+            "response": submission.essay_text,
             "feedback": {
                 "score": feedback_result.get("score", 0),
                 "strengths": feedback_result.get("strengths", []),
