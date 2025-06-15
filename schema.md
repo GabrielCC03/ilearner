@@ -2,8 +2,6 @@
 
 ## Collections Overview
 
-This schema uses separate collections for better scalability, performance, and to avoid MongoDB's 16MB document size limit.
-
 ### 1. LearningSpaces Collection
 
 {

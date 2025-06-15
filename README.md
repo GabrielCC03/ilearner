@@ -1,67 +1,74 @@
-# Setup
+# AI-Powered Assessment Tool
 
-## Backend
+A web application that transforms educational documents into interactive assessments and tutoring workflows.
 
-1. Create .venv in /backend
-2. Run with python main.py
+## Setup & Installation
 
-### Folder Structure:
+### Prerequisites
 
-```
-backend/
-├── internal/          # internal modules and utilities
-│   └── __init__.py
-├── routers/           # API route handlers
-│   ├── __init__.py
-│   ├── template.py    # template router example
-│   └── __pycache__/   # Python cache files
-├── api/               # API modules (empty - to be implemented)
-├── main.py            # main application entry point
-├── requirements.txt   # Python dependencies
-├── __init__.py        # package initialization
-├── .python-version    # Python version specification
-├── __pycache__/       # Python cache files
-└── .venv/             # virtual environment
-```
+- Docker
 
-## Frontend
+### Running the project
 
-1. In /frontend run npm install
-2. npm run dev
+From root run: docker-compose up
 
-### Folder Structure based on https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md:
+Services will be available at:
 
-src
-|
-+-- app               # application layer containing:
-|   |                 # this folder might differ based on the meta framework used
-|   +-- routes        # application routes / can also be pages
-|   +-- app.tsx       # main application component
-|   +-- provider.tsx  # application provider that wraps the entire application with different global providers - this might also differ based on meta framework used
-|   +-- router.tsx    # application router configuration
-+-- api               # API routers for communicating with the backend
-|
-+-- assets            # assets folder can contain all the static files such as images, fonts, etc.
-|
-+-- components        # shared components used across the entire application
-|
-+-- config            # global configurations, exported env variables etc.
-|
-+-- features          # feature based modules
-|
-+-- hooks             # shared hooks used across the entire application
-|
-+-- lib               # reusable libraries preconfigured for the application
-|
-+-- stores            # global state stores
-|
-+-- testing           # test utilities and mocks
-|
-+-- types             # shared types used across the application
-|
-+-- utils             # shared utility functions
+- Frontend: http://localhost:5173
+- Backend:  http://localhost:8000
 
+## Overview
 
-## Docker (To be Implemented)
+The AI-Powered Assessment Tool is a web application that allows learners to transform educational documents into interactive assessments and personalized tutoring workflows by organizing materials "Learning Spaces."
 
-1. Run the docker compose up document
+## Features
+
+- Create Learning Spaces. Learning Spaces are used to divide contents by topic (math, biology, etc...)
+- Upload documents into learning spaces. Users can upload multiple documents to a learning space
+- Delete and view the documents uploaded in the learning spaces
+- Chat-based tutoring interface for questions based on the material of the learning space
+- Tools for practicing and testing with the content on the learning space
+  - Essay topic: Generates an essay topic with guidelines and hints and provides feedback of the student answer
+  - MCQ: *(To be implemented)* Generate MCQs, evaluates the user answers, and provides explanations
+- Tool history for visualizing previous practices, their scores and feedbackm and repeating them.
+
+## Project Structure
+
+ilearner/
+├── backend/                # FastAPI backend
+│   ├── routers/            # API routers
+│   ├── models/             # Data models
+│   ├── internal/           # Internal utilities
+│   ├── main.py             # Application entrypoint
+│   └── requirements.txt    # Python dependencies
+├── frontend/               # React + Vite application
+│   ├── src/                # Source code
+│   │   ├── assets/         # Static assets (images, fonts, etc.)
+│   │   ├── api/            # API client & hooks
+│   │   ├── app/            # App entrypoint, routing, providers
+│   │   │   └── pages/      # Route pages
+│   │   ├── components/     # Reusable UI components
+│   │   ├── types/          # TypeScript types & interfaces
+│   │   ├── index.css       # Global CSS
+│   │   ├── main.tsx        # Main entrypoint
+│   ├── public/             # Static files served by Vite
+│   ├── Dockerfile
+├── docker-compose.yaml     # Docker Compose configuration
+├── schema.md               # MongoDB schema documentation
+├── PROJECT.md              # Project overview and requirements
+├── LICENSE                 # License file
+└── README.md               # This file
+
+## Schema
+
+*For the schema, please refer to schema.md.*
+A non-SQL database like MongoDB was used to ensure flexibility towards the toolHistory as the tool details of the interaction (such as the generated test, feedback, etc...) vary according to the tool, thus, MongoDB allow us to have documents with different structure in the same collection
+
+## Tech Stack
+
+- Frontend: React + TypeScript + Vite
+- Backend: FastAPI + Uvicorn
+- Database: MongoDB
+- Containerization: Docker
+
+## Notes and TODO
