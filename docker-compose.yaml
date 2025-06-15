@@ -3,8 +3,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    env_file:
-      - backend/.env
+    environment:
+      OPENROUTER_API_KEY: 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
     volumes:
       - ./backend:/app
     ports:
