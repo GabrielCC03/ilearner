@@ -4,8 +4,8 @@ export interface ToolHistoryResponse {
   id: string;
   learningSpaceId: string;
   type: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   status: string;
   toolData?: Record<string, any>;
   tags?: string[];

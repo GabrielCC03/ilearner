@@ -23,7 +23,7 @@ class MongoConnection:
         '''
         Establish connection to MongoDB using environment variables
         '''
-        mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017')
+        mongo_uri = os.getenv('MONGO_URI', 'mongodb://mongodb:27017') # Defaults to a local MongoDB instance
         self.client = MongoClient(mongo_uri, server_api=ServerApi('1'))
         self.db = self.client[self.database_name]
 
