@@ -4,7 +4,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     environment:
-      OPENROUTER_API_KEY: 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
+      OPENROUTER_API_KEY:
     volumes:
       - ./backend:/app
     ports:
