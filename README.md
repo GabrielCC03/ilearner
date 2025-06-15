@@ -4,6 +4,13 @@ A web application that transforms educational documents into interactive assessm
 
 ## Setup & Installation
 
+1. If the file was sent to you by email put it under /backend
+
+Else:
+
+1. Create a .env file as: /backend/.env
+2. Add the openrouter key with name: OPENROUTER_API_KEY
+
 ### Prerequisites
 
 - Docker
