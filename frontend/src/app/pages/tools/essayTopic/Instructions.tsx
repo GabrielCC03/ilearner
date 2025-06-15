@@ -67,7 +67,7 @@ export function Instructions({ essayData, isMinimized = false, isOpen = true, on
             <IconCheck size={16} color="var(--mantine-color-green-6)" />
             <Text fw={600} size="sm" c="green">Guidelines</Text>
           </Group>
-          <List size="sm" spacing="xs" c="black">
+          <List size="sm" spacing="xs" c="black" withPadding listStyleType="disc">
             {essayData?.guidelines.map((guideline, index) => (
               <List.Item key={index}>{guideline}</List.Item>
             ))}
@@ -80,7 +80,7 @@ export function Instructions({ essayData, isMinimized = false, isOpen = true, on
             <IconBook size={16} color="var(--mantine-color-yellow-7)" />
             <Text fw={600} size="sm" c="yellow.7">Helping Material</Text>
           </Group>
-          <List size="sm" spacing="xs" c="black">
+          <List size="sm" spacing="xs" c="black" withPadding listStyleType="disc">
             {essayData?.helpingMaterial.map((help, index) => (
               <List.Item key={index}>{help}</List.Item>
             ))}
